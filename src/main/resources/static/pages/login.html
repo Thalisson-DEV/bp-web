@@ -1,0 +1,17 @@
+<div class="auth-container">
+  <img class="logo-login" src="/assets/logo-v1.png" alt="logo-backpack">
+  <p>Acesse sua conta para continuar seus estudos.</p>
+  <form id="login-form">
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div class="form-group">
+      <label for="password">Senha</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+    <button type="submit" class="btn">Entrar</button>
+  </form>
+  <div id="error-message"></div>
+  <p class="auth-link">Não tem uma conta? <a href="#register" onclick="handleRouteChange()">Crie uma agora</a></p>
+</div>

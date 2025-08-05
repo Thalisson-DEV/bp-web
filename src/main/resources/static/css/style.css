@@ -1,0 +1,444 @@
+:root {
+    --primary-color: #004aad;
+    --primary-hover: #003073;
+    --secondary-color: #f8f9fa;
+    --text-color: #333;
+    --text-light: #777;
+    --border-color: #ddd;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --font-family: 'Poppins', sans-serif;
+}
+
+/* Reset básico e configurações globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo base do body, comum a todas as páginas */
+body {
+    font-family: var(--font-family);
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    min-height: 100vh;
+}
+
+/* Estilo específico para centralizar o conteúdo nas páginas de autenticação */
+body.auth-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* --- ESTILOS DE AUTENTICAÇÃO (LOGIN/REGISTRO) --- */
+
+.logo-login {
+    width: 200px;
+}
+
+.auth-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.auth-container h1 {
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.auth-container p {
+    margin-bottom: 30px;
+    color: var(--text-light);
+}
+
+.form-group {
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 3px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.auth-link {
+    margin-top: 20px;
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-link a:hover {
+    color: var(--primary-hover);
+}
+
+#error-message {
+    color: var(--error-color);
+    margin-top: 15px;
+    font-weight: 500;
+    display: none;
+}
+
+
+/* --- ESTILOS DO DASHBOARD --- */
+
+/* Estilo para os ícones SVG */
+.icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2;
+    vertical-align: middle; /* Alinha o ícone com o texto */
+}
+
+/* Layout principal do dashboard */
+.dashboard-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.sidebar-nav {
+    width: 260px;
+    background-color: #ffffff;
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease-in-out;
+}
+
+.sidebar-header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-logo {
+    width: 150px;
+}
+
+.nav-links {
+    list-style: none;
+    padding: 20px 0;
+    flex-grow: 1;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: var(--text-light);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+}
+
+.nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-right: 4px solid var(--primary-hover);
+}
+
+/* Estilo para o ícone e o texto dentro do link */
+.nav-link .icon {
+    margin-right: 15px;
+    color: var(--text-light);
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover .icon {
+    color: var(--primary-color);
+}
+
+.nav-link.active .icon {
+    color: white;
+}
+
+.sidebar-footer {
+    padding: 20px 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.main-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--secondary-color);
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.header-left h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.notification-bell {
+    position: relative;
+    cursor: pointer;
+}
+
+.notification-bell .icon {
+    width: 24px;
+    height: 24px;
+    color: var(--text-light);
+}
+
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background-color: var(--error-color);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-name {
+    font-weight: 600;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-right: 15px;
+}
+
+.mobile-menu-btn .icon {
+    width: 28px;
+    height: 28px;
+    color: var(--text-color);
+}
+
+.main-content {
+    padding: 30px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.welcome-banner {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.welcome-banner h2 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.card.card-full {
+    grid-column: 1 / -1;
+}
+
+.card h3 {
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress {
+    height: 100%;
+    background-color: var(--success-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: width 0.5s ease;
+}
+
+.card-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.achievement {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.achievement .icon {
+    width: 40px;
+    height: 40px;
+    color: #f1c40f;
+}
+
+.quick-access {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.quick-access-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 15px;
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.quick-access-item:hover {
+    background-color: var(--secondary-color);
+}
+
+.quick-access-item .icon {
+    width: 32px;
+    height: 32px;
+    color: var(--primary-color);
+}
+
+/* --- Responsividade --- */
+@media (max-width: 768px) {
+    .sidebar-nav {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100%;
+        z-index: 1000;
+        transform: translateX(-100%);
+    }
+
+    .sidebar-nav.open {
+        transform: translateX(0);
+    }
+
+    .mobile-menu-btn {
+        display: block;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .dashboard-header {
+        padding: 15px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .header-left h1 {
+        font-size: 1.2rem;
+    }
+}
