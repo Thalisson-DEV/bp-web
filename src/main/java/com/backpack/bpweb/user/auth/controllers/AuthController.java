@@ -8,6 +8,8 @@ import com.backpack.bpweb.user.entity.Usuarios;
 import com.backpack.bpweb.user.repositories.UsuariosRepository;
 import com.backpack.bpweb.user.service.EmailSenderService;
 import com.backpack.bpweb.user.service.UsuarioService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -45,7 +47,7 @@ public class AuthController {
 
         Cookie cookie = new Cookie("Authorization", "Bearer " + token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false); // Ativar só em produção
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(2 * 60 * 60);
 
@@ -107,6 +109,23 @@ public class AuthController {
         return ResponseEntity.ok().body("Nova senha gerada com sucesso.");
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+
+        if (request.getSession(false) != null) {
+            request.getSession(false).invalidate();
+        }
+
+        SecurityContextHolder.clearContext();
+
+        Cookie cookie = new Cookie("JSESSIONID", null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok("Logout realizado com sucesso.");
+    }
 
 
 }

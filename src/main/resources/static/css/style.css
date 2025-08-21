@@ -122,6 +122,13 @@ body.auth-view {
     display: none;
 }
 
+#success-message {
+    color: var(--success-color);
+    margin-top: 15px;
+    font-weight: 500;
+    display: none;
+}
+
 
 /* --- ESTILOS DO DASHBOARD --- */
 
