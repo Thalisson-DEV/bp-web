@@ -1,36 +1,5 @@
 const API_BASE_URL = 'http://localhost:8080';
 
-/**
- * Função para logar um usuário.
- * @param {object} credentials - Objeto com email e senha.
- * @returns {Promise<object>} - A resposta da API contendo o token.
- */
-async function loginUser(credentials) {
-    const loginData = {
-        email: credentials.email,
-        senha: credentials.password
-    };
-
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
-    });
-
-    if (!response.ok) {
-
-        const errorData = await response.json().catch(() => ({
-            message: 'Ocorreu um erro de comunicação com o servidor.'
-        }));
-
-        throw new Error(errorData.message || 'Credenciais inválidas.');
-    }
-
-    return response.json();
-}
-
 async function registerUser(userData) {
     const registerData = {
         nomeCompleto: userData.name,

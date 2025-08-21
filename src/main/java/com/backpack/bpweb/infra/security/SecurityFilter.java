@@ -1,7 +1,7 @@
 package com.backpack.bpweb.infra.security;
 
-import com.backpack.bpweb.models.Usuarios;
-import com.backpack.bpweb.repositories.UsuariosRepository;
+import com.backpack.bpweb.user.entity.Usuarios;
+import com.backpack.bpweb.user.repositories.UsuariosRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -38,8 +39,22 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     private String recoverToken(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("Authorization".equals(cookie.getName())) {
+                    String token = cookie.getValue();
+                    if (token.startsWith("Bearer ")) {
+                        return token.substring(7);
+                    }
+                    return token;
+                }
+            }
+        }
         var authHeader = request.getHeader("Authorization");
-        if(authHeader == null) return null;
-        return authHeader.replace("Bearer ", "");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        return null;
     }
 }

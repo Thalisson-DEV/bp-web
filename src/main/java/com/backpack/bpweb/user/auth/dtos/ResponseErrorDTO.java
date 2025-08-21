@@ -1,4 +1,4 @@
-package com.backpack.bpweb.dtos;
+package com.backpack.bpweb.user.auth.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

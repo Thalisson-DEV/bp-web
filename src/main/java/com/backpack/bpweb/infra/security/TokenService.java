@@ -3,7 +3,7 @@ package com.backpack.bpweb.infra.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
-import com.backpack.bpweb.models.Usuarios;
+import com.backpack.bpweb.user.entity.Usuarios;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -42,6 +42,10 @@ public class TokenService {
         } catch (Exception exception){
             return "";
         }
+    }
+
+    public String getUsernameFromToken(String token) {
+        return validateToken(token);
     }
 
     public Instant genExpirationDate() {

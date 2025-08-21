@@ -1,6 +1,6 @@
-package com.backpack.bpweb.exceptions;
+package com.backpack.bpweb.user.auth.exceptions;
 
-import com.backpack.bpweb.dtos.ResponseErrorDTO;
+import com.backpack.bpweb.user.auth.dtos.ResponseErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;

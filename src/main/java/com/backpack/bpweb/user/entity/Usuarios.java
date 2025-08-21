@@ -1,4 +1,4 @@
-package com.backpack.bpweb.models;
+package com.backpack.bpweb.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

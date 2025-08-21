@@ -1,6 +1,6 @@
-package com.backpack.bpweb.services;
+package com.backpack.bpweb.user.auth.services;
 
-import com.backpack.bpweb.repositories.UsuariosRepository;
+import com.backpack.bpweb.user.repositories.UsuariosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

@@ -1,22 +1,21 @@
-package com.backpack.bpweb.controllers;
+package com.backpack.bpweb.user.auth.controllers;
 
-import com.backpack.bpweb.dtos.LoginRequestDTO;
-import com.backpack.bpweb.dtos.LoginResponseDTO;
-import com.backpack.bpweb.dtos.UsuarioCreateDTO;
+import com.backpack.bpweb.user.auth.dtos.LoginRequestDTO;
+import com.backpack.bpweb.user.DTOs.UsuarioCreateDTO;
 import com.backpack.bpweb.infra.security.TokenService;
-import com.backpack.bpweb.models.Usuarios;
-import com.backpack.bpweb.repositories.UsuariosRepository;
-import com.backpack.bpweb.services.UsuarioService;
+import com.backpack.bpweb.user.entity.Usuarios;
+import com.backpack.bpweb.user.repositories.UsuariosRepository;
+import com.backpack.bpweb.user.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import jakarta.servlet.http.Cookie;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -35,13 +34,32 @@ public class AuthController {
     private UsuarioService usuarioService;
 
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Valid LoginRequestDTO data) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO data) {
         var usuarioPassword = new UsernamePasswordAuthenticationToken(data.email(), data.senha());
         var auth = this.authenticationManager.authenticate(usuarioPassword);
-        var user = usuarioService.getUsuarioByEmail(data.email());
         var token = tokenService.generateToken((Usuarios) auth.getPrincipal());
 
-        return ResponseEntity.ok(new LoginResponseDTO(token, user));
+        Cookie cookie = new Cookie("Authorization", "Bearer " + token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // Ativar só em produção
+        cookie.setPath("/");
+        cookie.setMaxAge(2 * 60 * 60);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, String.format("%s=%s; HttpOnly; Path=/; Max-Age=%d", cookie.getName(), token, cookie.getMaxAge()))
+                .body("Autenticado com sucesso.");
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(401).body("Não autorizado");
+        }
+
+        var usuario = (Usuarios) auth.getPrincipal();
+        var usuarioDTO = repository.findByEmailToDTO(usuario.getEmail());
+        return ResponseEntity.ok(usuarioDTO);
     }
 
     @PostMapping("/register")

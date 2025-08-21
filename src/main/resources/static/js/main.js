@@ -6,29 +6,38 @@ const routes = {
     '#dashboard': 'pages/dashboard.html'
 };
 
-function populateDashboard() {
-    const user = getUser();
-    if (!user || !user.nomeCompleto) {
-        console.error("populateDashboard: Não foi possível encontrar o usuário ou o nome completo nos dados.", user);
-        return;
-    }
+async function fetchCurrentUser() {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Usuário não autenticado');
+    return response.json();
+}
 
-    const welcomeBanner = document.getElementById('welcome-banner');
-    const headerUserName = document.getElementById('header-user-name');
-    const userAvatar = document.getElementById('user-avatar');
+async function populateDashboard() {
+    try {
+        const user = await fetchCurrentUser();
 
-    const firstName = user.nomeCompleto.split(' ')[0];
+        const welcomeBanner = document.getElementById('welcome-banner');
+        const headerUserName = document.getElementById('header-user-name');
+        const userAvatar = document.getElementById('user-avatar');
 
-    if (welcomeBanner) {
-        welcomeBanner.querySelector('h2').textContent = `Olá, ${firstName}! 👋`;
-    }
-    if (headerUserName) {
-        headerUserName.textContent = user.nomeCompleto;
-    }
-    if (userAvatar) {
-        const initial = user.nomeCompleto.charAt(0).toUpperCase();
-        userAvatar.src = `https://placehold.co/40x40/004aad/white?text=${initial}`;
-        userAvatar.alt = `Avatar de ${user.nomeCompleto}`;
+        const firstName = user.nomeCompleto.split(' ')[0];
+
+        if (welcomeBanner) {
+            welcomeBanner.querySelector('h2').textContent = `Olá, ${firstName}! 👋`;
+        }
+        if (headerUserName) {
+            headerUserName.textContent = user.nomeCompleto;
+        }
+        if (userAvatar) {
+            const initial = user.nomeCompleto.charAt(0).toUpperCase();
+            userAvatar.src = `https://placehold.co/40x40/004aad/white?text=${initial}`;
+            userAvatar.alt = `Avatar de ${user.nomeCompleto}`;
+        }
+    } catch (error) {
+        window.location.hash = '#login';
     }
 }
 
@@ -44,11 +53,6 @@ async function loadPage(url) {
         attachFormListeners();
 
         if (window.location.hash.startsWith('#dashboard')) {
-            // *** A CORREÇÃO ESTÁ AQUI ***
-            // Usamos setTimeout com 0ms de delay.
-            // Isso 'empurra' a execução de populateDashboard para o final da fila de tarefas do navegador,
-            // garantindo que o HTML já foi completamente renderizado na tela antes de tentarmos manipulá-lo.
-            // Isso resolve a condição de corrida.
             setTimeout(populateDashboard, 0);
         }
 
@@ -90,29 +94,34 @@ function attachFormListeners() {
  */
 async function handleLoginSubmit(event) {
     event.preventDefault();
+
     const errorMessageDiv = document.getElementById('error-message');
     errorMessageDiv.style.display = 'none';
 
     const formData = new FormData(event.target);
     const credentials = Object.fromEntries(formData.entries());
 
+    const loginData = {
+        email: credentials.email,
+        senha: credentials.password
+    };
+
     try {
-        const result = await loginUser(credentials);
+        const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(loginData),
+            credentials: 'include'
+        });
 
-        // *** FERRAMENTA DE DEBUG ADICIONADA AQUI ***
-        // Esta linha irá mostrar a resposta EXATA da sua API no console do navegador.
-        console.log('RESPOSTA COMPLETA DA API:', result);
-
-        // O código agora verifica a estrutura que o seu DTO LoginResponseDTO envia.
-        if (result.token && result.user) {
-            saveToken(result.token);
-            saveUser(result.user);
-
-            window.location.hash = '#dashboard';
-            handleRouteChange();
-        } else {
-            throw new Error("Resposta da API inválida. Verifique se o backend retorna 'token' e o objeto 'user'.");
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Erro no login');
         }
+
+        window.location.hash = '#dashboard';
+        handleRouteChange();
+
     } catch (error) {
         errorMessageDiv.textContent = error.message;
         errorMessageDiv.style.display = 'block';
@@ -149,8 +158,6 @@ async function handleRegisterSubmit(event) {
     try {
         console.log('Enviando dados de registro:', userData);
         await registerUser(userData);
-        // Após o registro bem-sucedido, redireciona para o login
-        alert('Registro realizado com sucesso! Faça o login para continuar.');
         window.location.hash = '#login';
         handleRouteChange();
     } catch (error) {
@@ -167,19 +174,6 @@ async function handleRegisterSubmit(event) {
 function handleRouteChange() {
     const hash = window.location.hash || '#login';
 
-    if (hash === '#dashboard' && !isUserLoggedIn()) {
-        window.location.hash = '#login';
-        // A função será chamada novamente pelo 'hashchange', então podemos parar aqui.
-        return;
-    }
-
-    if ((hash === '#login' || hash === '#register') && isUserLoggedIn()) {
-        window.location.hash = '#dashboard';
-        // A função será chamada novamente pelo 'hashchange'.
-        return;
-    }
-
-    // *** NOVA LÓGICA PARA CONTROLAR A CLASSE DO BODY ***
     if (hash.includes('dashboard')) {
         document.body.className = 'dashboard-view';
     } else {
