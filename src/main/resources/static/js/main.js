@@ -2,6 +2,7 @@ const appRoot = document.getElementById('app-root');
 
 const routes = {
     '#login': 'pages/login.html',
+    '#forgot-password': 'pages/forgotenPassword.html',
     '#register': 'pages/register.html',
     '#dashboard': 'pages/dashboard.html'
 };
@@ -80,6 +81,11 @@ function attachFormListeners() {
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLoginSubmit);
+    }
+
+    const forgotForm = document.getElementById('forgot-password-form');
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', handleForgotPasswordSubmit);
     }
 
     const registerForm = document.getElementById('register-form');
@@ -167,6 +173,47 @@ async function handleRegisterSubmit(event) {
     }
 }
 
+/**
+ * Lida com a submissão do formulário de recuperação de senha.
+ * @param {Event} event - O evento de submissão do formulário.
+ */
+async function handleForgotPasswordSubmit(event) {
+    event.preventDefault();
+
+    const errorMessageDiv = document.getElementById('error-message');
+    const successMessageDiv = document.getElementById('success-message');
+
+    errorMessageDiv.style.display = 'none';
+    successMessageDiv.style.display = 'none';
+
+    const formData = new FormData(event.target);
+    const credentials = Object.fromEntries(formData.entries());
+
+    const userData = { email: credentials.email };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/auth/forgot-password`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Erro ao solicitar recuperação de senha');
+        }
+
+        const successText = await response.text();
+        successMessageDiv.textContent = successText || "Nova senha enviada para seu email.";
+        successMessageDiv.style.display = 'block';
+
+        event.target.reset();
+
+    } catch (error) {
+        errorMessageDiv.textContent = error.message;
+        errorMessageDiv.style.display = 'block';
+    }
+}
 
 /**
  * Função principal que gerencia as rotas.

@@ -1,10 +1,12 @@
 package com.backpack.bpweb.user.auth.controllers;
 
+import com.backpack.bpweb.user.DTOs.EmailDTO;
 import com.backpack.bpweb.user.auth.dtos.LoginRequestDTO;
 import com.backpack.bpweb.user.DTOs.UsuarioCreateDTO;
 import com.backpack.bpweb.infra.security.TokenService;
 import com.backpack.bpweb.user.entity.Usuarios;
 import com.backpack.bpweb.user.repositories.UsuariosRepository;
+import com.backpack.bpweb.user.service.EmailSenderService;
 import com.backpack.bpweb.user.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +34,8 @@ public class AuthController {
     private TokenService tokenService;
     @Autowired
     private UsuarioService usuarioService;
+    @Autowired
+    private EmailSenderService emailService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO data) {
@@ -83,5 +87,26 @@ public class AuthController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody @Valid EmailDTO requestEmail) {
+        String email = requestEmail.email();
+        String newPassword = usuarioService.generatePassword(10);
+        String encryptedPassword = new BCryptPasswordEncoder().encode(newPassword);
+
+        Usuarios usuario = repository.findByEmail(email);
+
+        if (usuario == null) {
+            return ResponseEntity.badRequest().body("Usuário não encontrado para o email informado.");
+        }
+
+        usuario.setSenha(encryptedPassword);
+        repository.save(usuario);
+
+        emailService.sendNewPasswordEmail(usuario, newPassword);
+        return ResponseEntity.ok().body("Nova senha gerada com sucesso.");
+    }
+
+
 
 }
