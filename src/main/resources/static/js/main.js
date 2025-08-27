@@ -57,7 +57,8 @@ const routes = {
     '#forgot-password': 'pages/forgotenPassword.html',
     '#register': 'pages/register.html',
     '#dashboard': 'pages/dashboard.html',
-    '#video-class': 'pages/classes.html'
+    '#video-class': 'pages/classes.html',
+    '#subject/video-class': 'pages/class-list.html'
 };
 
 /**
@@ -65,9 +66,11 @@ const routes = {
  * Essa é a função central do roteador.
  */
 function handleRouteChange() {
-    // Define a rota padrão como '#login' se nenhuma hash estiver presente.
     const hash = window.location.hash || '#login';
-    const pageUrl = routes[hash] || routes['#login'];
+
+    const baseRoute = hash.split('?')[0];
+
+    const pageUrl = routes[baseRoute] || routes['#login'];
 
     updateActiveNavLink(hash);
     updateBodyClass(hash);
@@ -132,7 +135,7 @@ function renderMateriasCards(materias) {
                 <div class="progress-bar">
                     <div class="progress" style="width: ${progressoFicticio}%;">${progressoFicticio}%</div>
                 </div>
-                <a href="#video-class/${materia.id}" class="card-link">Ver aulas</a>
+                <a href="#subject/video-class?materiaId=${materia.id}" class="card-link">Ver aulas</a>
             </div>
         `;
     }).join('');
@@ -160,6 +163,11 @@ async function attachPageSpecificLogic() {
         attachClassPageListeners();
         await loadMaterias();
     }
+
+    // Lógica específica para a página de videoaulas por materias
+    else if (hash.startsWith('#subject/video-class')) {
+        await handleAulasPage();
+    }
 }
 
 
@@ -179,6 +187,36 @@ async function fetchCurrentUser() {
     });
     if (!response.ok) throw new Error('Usuário não autenticado');
     return response.json();
+}
+
+/**
+ * Busca no backend a lista de aulas para uma matéria específica.
+ * @param {number} materiaId - O ID da matéria.
+ * @returns {Promise<Array>} - Uma promessa que resolve para a lista de aulas.
+ */
+async function fetchAulasPorMateria(materiaId) {
+    const url = `${API_BASE_URL}/api/v1/aulas/by-materia/${materiaId}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (!response.ok) {
+            // Se a resposta não for OK, tenta ler a mensagem de erro do backend
+            const errorText = await response.text();
+            throw new Error(errorText || `Erro ao buscar aulas para a matéria ${materiaId}`);
+        }
+
+        // Se a resposta for OK, retorna os dados em formato JSON
+        return response.json();
+
+    } catch (error) {
+        console.error('Falha na requisição de aulas:', error);
+        // Retorna um array vazio em caso de erro para não quebrar a interface
+        return [];
+    }
 }
 
 /**
@@ -292,7 +330,9 @@ function updateBodyClass(hash) {
         document.body.className = 'dashboard-view';
     } else if (hash.startsWith('#video-class')) {
         document.body.className = 'classes-view';
-    } else {
+    } else if (hash.startsWith('#subject/video-class')) {
+        document.body.className = 'classes-view';
+    }else {
         document.body.className = 'auth-view';
     }
 }
@@ -453,13 +493,63 @@ function attachCommonFormListeners() {
 }
 
 /**
+ * Adiciona os 'escutadores' de evento de clique aos cabeçalhos do acordeão de aulas.
+ */
+function attachAccordionListeners() {
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+    accordionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            // Adiciona ou remove a classe 'active' para controlar o estado
+            this.classList.toggle('active');
+        });
+    });
+}
+
+/**
  * Anexa listeners para elementos que existem apenas na página de aulas.
  */
 function attachClassPageListeners() {
+    // Filtro para o seletor de matérias
     const filterMateria = document.getElementById('filter-materia');
     if (filterMateria) {
         filterMateria.addEventListener('change', (e) => updateFilter('materiaId', e.target.value));
     }
+
+    // Filtro para o campo de busca por nome/título
+    const filterTitulo = document.getElementById('busca-nome-materia');
+    if (filterTitulo) {
+        const debouncedUpdate = debounce((value) => {
+            updateFilter('searchTerm', value);
+        }, 1000); // 500ms para ter certeza
+
+        // listener que chama a função com debounce
+        filterTitulo.addEventListener('input', (e) => {
+            debouncedUpdate(e.target.value);
+        });
+    } else {
+        console.error("Campo de busca #busca-nome-materia não foi encontrado na página.");
+    }
+}
+
+/**
+ * Cria uma versão "debounced" de uma função que atrasa sua execução
+ * até que um certo tempo tenha passado sem que ela seja chamada novamente.
+ * Ótimo para eventos como 'input' ou 'resize'.
+ * @param {Function} func A função a ser "debounced".
+ * @param {number} delay O tempo de espera em milissegundos.
+ * @returns {Function} A nova função "debounced".
+ */
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        // Cancela o timer anterior se a função for chamada novamente
+        clearTimeout(timeoutId);
+        // Configura um novo timer
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
 }
 
 
@@ -567,6 +657,86 @@ async function handleForgotPasswordSubmit(event) {
         errorMessageDiv.textContent = error.message;
         errorMessageDiv.style.display = 'block';
     }
+}
+
+/**
+ * Lida com a lógica da página de aulas: busca as aulas e as renderiza
+ * em um formato de lista sanfonada (acordeão) com layout moderno.
+ */
+async function handleAulasPage() {
+
+    const params = new URLSearchParams(window.location.hash.split('?')[1]);
+    const materiaId = params.get('materiaId');
+    const classListContainer = document.getElementById('class-list');
+    const pageTitle = document.querySelector('.main-container h1');
+
+    if (!materiaId) {
+        console.error("ID da Matéria não encontrado na URL.");
+        if (classListContainer) classListContainer.innerHTML = `<p>Erro: ID da matéria não especificado.</p>`;
+        return;
+    }
+
+    if (pageTitle) pageTitle.textContent = `Aulas da Matéria`;
+
+    const aulas = await fetchAulasPorMateria(materiaId);
+
+    if (!classListContainer) {
+        console.error("Elemento com id='class-list' não encontrado no HTML.");
+        return;
+    }
+
+    if (aulas && aulas.length > 0) {
+        const aulasHtml = aulas.map((aula, index) => {
+            const embedUrl = convertToEmbedUrl(aula.link);
+
+            // --- ESTRUTURA HTML ATUALIZADA ---
+            return `
+            <div class="accordion-item">
+                <button class="accordion-header">
+                    <div class="aula-number-circle">${index + 1}</div>
+                    <div class="header-title">
+                        <span class="aula-titulo">${aula.titulo}</span>
+                    </div>
+                    <div class="header-meta">
+                        <span class="aula-duracao">${aula.duracaoSegundos} seg</span>
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                </button>
+                <div class="accordion-content">
+                    <div class="content-wrapper">
+                        <div class="video-column">
+                            <div class="video-player-wrapper">
+                                <iframe src="${embedUrl}" title="${aula.titulo}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <div class="details-column">
+                             <p class="aula-descricao">${aula.descricao}</p>
+                             <button class="mark-as-watched-btn" data-aula-id="${aula.id}">
+                                Marcar como assistida
+                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;}).join('');
+
+        classListContainer.innerHTML = aulasHtml;
+        attachAccordionListeners();
+    } else {
+        classListContainer.innerHTML = `<p class="empty-message">Nenhuma aula encontrada para esta matéria.</p>`;
+    }
+}
+
+/**
+ * Converte uma URL de visualização do YouTube para uma URL de 'embed'.
+ * @param {string} url - A URL original do YouTube (ex: .../watch?v=VIDEO_ID).
+ * @returns {string} - A URL no formato 'embed' (ex: .../embed/VIDEO_ID).
+ */
+function convertToEmbedUrl(url) {
+    if (!url) return ''; // Retorna vazio se a URL for nula ou indefinida
+
+    // A mágica acontece aqui: substitui '/watch?v=' por '/embed/'
+    return url.replace('/watch?v=', '/embed/');
 }
 
 /**

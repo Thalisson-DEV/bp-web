@@ -15,10 +15,12 @@ public interface MateriaRepository extends JpaRepository<Materia, Integer> {
     @Query(
             nativeQuery = true,
             value = "SELECT m.* FROM materias m " +
-                    "WHERE (:searchTerm IS NULL OR LOWER(CAST(m.nome AS TEXT)) LIKE LOWER(CONCAT('%', :searchTerm, '%')))"
+                    "WHERE (:searchTerm IS NULL OR LOWER(m.nome) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+                    "AND (:materiaId IS NULL OR m.id = :materiaId)"
     )
     Page<Materia> findWithFilters(
             @Param("searchTerm") String searchTerm,
+            @Param("materiaId") Integer materiaId,
             Pageable pageable
     );
 

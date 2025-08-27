@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/aulas")
 public class AulaController {
@@ -17,13 +19,24 @@ public class AulaController {
     @Autowired
     private AulaService aulaService;
 
-    // Publico
-    @GetMapping
+    // Role Admin
+    @GetMapping("/all")
     public ResponseEntity<?> findAllAulasWithFilter(Integer materiaId, String searchTerm, Pageable pageable) {
         try {
             Page<AulaResponseDTO> aulaPage = aulaService.findAulaWithFilters(materiaId, searchTerm, pageable);
             return ResponseEntity.ok(aulaPage);
         } catch (NullPointerException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // publico
+    @GetMapping ("/by-materia/{materiaId}")
+    public ResponseEntity<?> findAulasByMateriaId(@PathVariable(value = "materiaId") Integer materiaId) {
+        try {
+            List<AulaResponseDTO> aulas = aulaService.findAllAulasByMateriaId(materiaId);
+            return ResponseEntity.ok(aulas);
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

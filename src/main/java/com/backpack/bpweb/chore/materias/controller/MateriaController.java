@@ -30,9 +30,9 @@ public class MateriaController {
 
     // Publico
     @GetMapping
-    public ResponseEntity<?> findAllMaterias(String searchTerm, Pageable pageable) {
+    public ResponseEntity<?> findAllMaterias(String searchTerm, Integer materiaId, Pageable pageable) {
         try {
-            Page<MateriaResponseDTO> materiaPage = materiaService.findMateriasWithFilters(searchTerm, pageable);
+            Page<MateriaResponseDTO> materiaPage = materiaService.findMateriasWithFilters(searchTerm, materiaId, pageable);
             return ResponseEntity.ok(materiaPage);
         } catch (NullPointerException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

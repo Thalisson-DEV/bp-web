@@ -25,5 +25,5 @@ public class Aula {
     private int duracaoSegundos;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "materia_id")
-    private Materia MateriaId;
+    private Materia materia;
 }

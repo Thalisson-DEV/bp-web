@@ -55,8 +55,8 @@ public class MateriaService {
     }
 
     // Publico
-    public Page<MateriaResponseDTO> findMateriasWithFilters(String searchTerm, Pageable pageable) {
-        Page<Materia> materiaPage = repository.findWithFilters(searchTerm, pageable);
+    public Page<MateriaResponseDTO> findMateriasWithFilters(String searchTerm, Integer materiaId, Pageable pageable) {
+        Page<Materia> materiaPage = repository.findWithFilters(searchTerm, materiaId, pageable);
         if (materiaPage.isEmpty()) {
             throw new NullPointerException("Nenhuma matéria encontrada com os filtros definidos.");
         }

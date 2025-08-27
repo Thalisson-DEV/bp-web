@@ -12,6 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class AulaService {
 
@@ -28,6 +31,18 @@ public class AulaService {
             throw new NullPointerException("Nenhuma aula encontrada com os filtros definidos.");
         }
         return aulaPage.map(AulaResponseDTO::new);
+    }
+
+    // publico
+    public List<AulaResponseDTO> findAllAulasByMateriaId(Integer materiaId) {
+        List<Aula> aulas = repository.findAllByMateriaId(materiaId);
+        if (aulas.isEmpty()) {
+            throw new EntityNotFoundException("Nenhuma aula encontrada com o id da materia informado.");
+        }
+        return aulas
+                .stream()
+                .map(AulaResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
     // publico
@@ -82,6 +97,6 @@ public class AulaService {
         entity.setDescricao(dto.descricao());
         entity.setDuracaoSegundos(dto.duracaoSegundos());
         entity.setLink(dto.link());
-        entity.setMateriaId(materia);
+        entity.setMateria(materia);
     }
 }

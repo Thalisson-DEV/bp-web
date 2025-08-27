@@ -46,29 +46,28 @@
         </header>
 
         <main class="main-content">
-            <!-- ID adicionado para a saudação -->
-            <div class="welcome-banner" id="welcome-banner">
-                <h2>Olá, ... 👋</h2>
-                <p>Visite as video aulas da nossa plataforma abaixo!</p>
-            </div>
 
             <!-- BARRA DE FILTROS -->
             <div class="filter-bar">
                 <div class="filter-group">
-                    <label for="filter-materia">Materia</label>
-                    <select id="filter-materia"></select>
+                    <label for="filter-status-aula">Status da Aula</label>
+                    <select id="filter-status-aula"></select>
                 </div>
                 <div class="filter-group search">
-                    <label for="busca-nome-materia">Titulo da Materia</label>
+                    <label for="busca-nome-aula">Titulo da Aula</label>
                     <div class="search-container">
-                        <input type="text" id="busca-nome-materia" placeholder="Busca por titulo...">
+                        <input type="text" id="busca-nome-aula" placeholder="Busca por titulo...">
                     </div>
                 </div>
             </div>
 
-            <div id="materias-grid" class="content-grid">
+            <!-- LISTA DE AULAS -->
+            <!-- AQUI EU GOSTARIA DE UMA LISTA NUMERADA DE AULAS, EX: AULA 1, AULA 2, AULA 3, ETC -->
+            <!-- DEVE SER NO FORMATO DROPDOWN, CLICAR E ABRIR AS INFORMAÇÕES, COM UM REPRODUTOR DA AULA, NOME, DESCRIÇÃO, DURAÇÃO E UM BOTÃO PARA MARCAR COMO ASSISTIDA (POR EQUANTO PODE SER SÓ UM BOTÃO SEM AÇÃO) -->
+            <div class="class-list" id="class-list">
+                <!-- AQUI DEVE SER A LISTA DE AULAS -->
+                <!-- EU AINDA NÃO TENHO UMA ESTILIZAÇÃO PARA ESSA PARTE DAS AULAS, ME AJUDE COM ISSO -->
             </div>
-
 
             <div class="pagination-controls" id="pagination-materias"></div>
         </main>

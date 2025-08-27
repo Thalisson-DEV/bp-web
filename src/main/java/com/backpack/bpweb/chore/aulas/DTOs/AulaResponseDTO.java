@@ -19,7 +19,7 @@ public record AulaResponseDTO(
                 aula.getDescricao(),
                 aula.getLink(),
                 aula.getDuracaoSegundos(),
-                aula.getMateriaId() != null ? new MateriaDTO(aula.getMateriaId()) : null
+                aula.getMateria() != null ? new MateriaDTO(aula.getMateria()) : null
         );
     }
 }
