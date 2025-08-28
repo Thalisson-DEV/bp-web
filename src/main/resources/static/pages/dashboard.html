@@ -34,7 +34,7 @@
             <div class="header-right">
                 <div class="notification-bell">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                    <span class="notification-badge">3</span>
+                    <span class="notification-badge">0</span>
                 </div>
                 <div class="user-profile">
                     <!-- ID adicionado para o avatar -->
@@ -53,15 +53,31 @@
             </div>
 
             <div class="content-grid">
-                <div class="card">
-                    <h3>Sua Meta Semanal</h3>
-                    <p>Você completou <strong>2 de 5</strong> tópicos planejados.</p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 40%;">40%</div>
-                    </div>
-                    <a href="#metas" class="card-link">Ver detalhes</a>
+                <div class="card stat-card">
+                    <h3>Aulas Assistidas</h3>
+                    <p>O total de aulas que você já concluiu.</p>
+                    <div class="stat-number" id="stat-aulas-vistas">...</div>
                 </div>
 
+                <div class="card stat-card">
+                    <h3>Aulas Pendentes</h3>
+                    <p>Continue para zerar este número!</p>
+                    <div class="stat-number" id="stat-aulas-pendentes">...</div>
+                </div>
+
+                <div class="card stat-card">
+                    <h3>Média Diária</h3>
+                    <p>Aulas assistidas por dia, em média.</p>
+                    <div class="stat-number" id="stat-media-diaria">...</div>
+                </div>
+
+                <div class="card stat-card">
+                    <h3>Total de Aulas</h3>
+                    <p>O número total de aulas na plataforma.</p>
+                    <div class="stat-number" id="stat-total-aulas">...</div>
+                </div>
+
+                <!--
                 <div class="card">
                     <h3>Última Conquista</h3>
                     <div class="achievement">
@@ -73,13 +89,14 @@
                     </div>
                     <a href="#perfil" class="card-link">Ver todas as conquistas</a>
                 </div>
+                -->
 
                 <div class="card card-full">
                     <h3>Acesso Rápido</h3>
                     <div class="quick-access">
-                        <a href="#videoaulas" class="quick-access-item">
+                        <a href="#video-class" class="quick-access-item">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                            <span>Continuar Aula</span>
+                            <span>Assistir Aulas</span>
                         </a>
                         <a href="#flashcards" class="quick-access-item">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>

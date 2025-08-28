@@ -238,7 +238,7 @@ body.auth-view {
 }
 
 .header-left h1 {
-    font-size: 1.5rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
@@ -345,6 +345,32 @@ body.auth-view {
 .card h3 {
     margin-bottom: 15px;
     font-weight: 600;
+}
+
+.stat-card h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.stat-card p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    flex-grow: 1; /* Faz o parágrafo empurrar o número para baixo */
+}
+
+.stat-number {
+    font-size: 2.5rem; /* Tamanho grande para o número */
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: left; /* Alinha o número à esquerda do card */
+    line-height: 1;
+    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+}
+
+.content-grid .card {
+    display: flex;
+    flex-direction: column;
 }
 
 .progress-bar {
@@ -722,6 +748,28 @@ body.auth-view {
     flex-grow: 1; /* Faz a descrição ocupar o espaço disponível */
 }
 
+.aula-subtitulo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-color);
+}
+
+/* Estilo para o círculo da aula concluída */
+.aula-number-circle.concluida {
+    background-color: #1a7f37; /* Verde sucesso */
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Estilo para o botão de aula concluída */
+.mark-as-watched-btn.concluida {
+    background-color: #f0f0f0;
+    color: #555;
+    cursor: not-allowed;
+    border: 1px solid var(--border-color);
+}
+
 .mark-as-watched-btn {
     background-color: var(--primary-color);
     color: white;
@@ -738,6 +786,13 @@ body.auth-view {
     background-color: var(--primary-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 1.1rem;
+    padding: 2rem 0;
 }
 
 /* --- Responsividade para Telas Menores --- */

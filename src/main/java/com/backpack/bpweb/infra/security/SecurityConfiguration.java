@@ -30,6 +30,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/", "/**.html", "/assets/**", "/js/**", "/css/**", "/pages/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/v1/progresso/aulas").permitAll()
+                        .requestMatchers(HttpMethod.POST, "api/v1/progresso/aulas").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )

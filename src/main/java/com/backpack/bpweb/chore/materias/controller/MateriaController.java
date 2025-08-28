@@ -1,14 +1,18 @@
 package com.backpack.bpweb.chore.materias.controller;
 
+import com.backpack.bpweb.chore.materias.DTOs.MateriaComConclusaoDTO;
 import com.backpack.bpweb.chore.materias.DTOs.MateriaDTO;
 import com.backpack.bpweb.chore.materias.DTOs.MateriaResponseDTO;
 import com.backpack.bpweb.chore.materias.service.MateriaService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.security.auth.message.AuthException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/materias")
@@ -48,6 +52,12 @@ public class MateriaController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/meu-progresso")
+    public ResponseEntity<List<MateriaComConclusaoDTO>> getMateriasComProgresso() throws AuthException {
+        List<MateriaComConclusaoDTO> materias = materiaService.buscarMateriasComProgresso();
+        return ResponseEntity.ok(materias);
     }
 
     // Role Admin
