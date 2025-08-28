@@ -795,6 +795,157 @@ body.auth-view {
     padding: 2rem 0;
 }
 
+/* --- Página de Lista de Resumos --- */
+.resumo-list {
+    list-style: none;
+    padding: 0;
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.resumo-list li:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.resumo-link-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: background-color 0.2s ease;
+}
+
+.resumo-link-item:hover {
+    background-color: #f9f9f9;
+    color: var(--primary-color);
+}
+
+#resumo-detail-container {
+    backgroud-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+
+.resumo-link-item .resumo-titulo {
+    font-weight: 500;
+}
+
+.resumo-link-item .chevron {
+    stroke: var(--text-light);
+}
+
+/* --- Página de Detalhe do Resumo --- */
+.resumo-detail-container .resumo-title {
+    margin-bottom: 0.5rem;
+}
+
+.resumo-detail-container .materia-tag {
+    display: inline-block;
+    background-color: #e9ecef;
+    color: var(--text-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+.resumo-content {
+    line-height: 1.7;
+}
+
+.resumo-content p {
+    margin-bottom: 1em;
+}
+
+.resumo-content h1, .resumo-content h2, .resumo-content h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.resumo-content ul, .resumo-content ol {
+    padding-left: 2em;
+}
+
+/* ========================================= */
+/* == CSS para Tabelas Geradas por Markdown == */
+/* ========================================= */
+
+.resumo-content table {
+    width: 100%;
+    border-collapse: collapse; /* Une as bordas das células */
+    margin: 2rem 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden; /* Garante que o border-radius funcione no cabeçalho */
+}
+
+.resumo-content th,
+.resumo-content td {
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+/* Estilo do cabeçalho da tabela */
+.resumo-content thead tr {
+    background-color: var(--primary-color, #004aad);
+    color: white;
+}
+
+.resumo-content thead th {
+    font-weight: 600;
+    border-color: var(--primary-color, #004aad);
+}
+
+/* Estilo do corpo da tabela */
+.resumo-content tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Linhas zebradas para melhor leitura */
+}
+
+.resumo-content tbody tr:hover {
+    background-color: #f1f1f1; /* Efeito ao passar o mouse */
+}
+
+/* ========================================================= */
+/* == Estilização de Cabeçalhos e Negrito nos Resumos == */
+/* ========================================================= */
+
+/*
+ * Aplica a cor primária a todos os níveis de cabeçalho (h1, h2, h3...)
+ * que forem gerados dentro do container do resumo.
+ */
+.resumo-content h1,
+.resumo-content h2,
+.resumo-content h3,
+.resumo-content h4,
+.resumo-content h5,
+.resumo-content h6 {
+    color: var(--primary-color);
+    margin-top: 1.8em;
+}
+
+.resumo-title {
+    color: var(--primary-color);
+}
+
+
+/*
+ * Aplica a cor primária a todo texto que estiver em negrito.
+ * O marked.js converte '**texto**' na tag <strong>.
+ */
+.resumo-content strong {
+    color: var(--primary-color);
+    font-weight: 600; /* Garante um negrito bem definido */
+}
+
 /* --- Responsividade para Telas Menores --- */
 @media (max-width: 768px) {
     .content-wrapper {

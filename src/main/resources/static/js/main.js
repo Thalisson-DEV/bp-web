@@ -2,8 +2,8 @@
  * @file Script principal para uma Single Page Application (SPA).
  * Gerencia o roteamento, carregamento de páginas, autenticação de usuário e
  * a exibição de dados dinâmicos da API.
- * @author Seu Nome
- * @version 2.0.0
+ * @author Thalisson
+ * @version 3.0.0
  */
 
 /**
@@ -58,7 +58,10 @@ const routes = {
     '#register': 'pages/register.html',
     '#dashboard': 'pages/dashboard.html',
     '#video-class': 'pages/classes.html',
-    '#subject/video-class': 'pages/class-list.html'
+    '#subject/video-class': 'pages/class-list.html',
+    '#summarys': 'pages/summarys.html',
+    '#subject/summarys': 'pages/summarys-by-materia.html',
+    '#subject/summary-detail': 'pages/summary-detail.html'
 };
 
 /**
@@ -106,7 +109,7 @@ async function loadPage(url) {
  * Renderiza os cards de matéria na tela usando os dados reais de progresso.
  * (Versão atualizada para usar o campo 'percentualConclusao')
  */
-function renderMateriasCards(materias) {
+function renderMateriasCardsWithProgress(materias) {
     const gridContainer = document.getElementById('materias-grid');
     if (!gridContainer) return;
 
@@ -134,11 +137,37 @@ function renderMateriasCards(materias) {
 }
 
 /**
+ * Renderiza os cards de matéria na tela SEM usar os dados reais de progresso.
+ */
+function renderMateriasCardsWithNoProgress(materias) {
+    const gridContainer = document.getElementById('materias-grid');
+    if (!gridContainer) return;
+
+    if (!materias || materias.length === 0) {
+        gridContainer.innerHTML = '<p>Nenhuma matéria encontrada.</p>';
+        return;
+    }
+
+    const cardsHtml = materias.map(materia => {
+
+        return `
+            <div class="card">
+                <h3>${materia.nome}</h3>
+                <a href="#subject/summarys?materiaId=${materia.id}" class="card-link">Ver resumos <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></a>
+            </div>
+        `;
+    }).join('');
+
+    gridContainer.innerHTML = cardsHtml;
+}
+
+/**
  * Anexa a lógica específica para cada página após seu carregamento.
  * Isso garante que os elementos do DOM existam antes de manipularmos eles.
  */
 async function attachPageSpecificLogic() {
     const hash = window.location.hash || '#login';
+    console.log("O hash atual é:", hash);
 
     // Lógica para páginas que exigem dados do usuário (dashboard, aulas, etc.)
     if (hash.startsWith('#dashboard') || hash.startsWith('#video-class')) {
@@ -164,6 +193,25 @@ async function attachPageSpecificLogic() {
     else if (hash.startsWith('#subject/video-class')) {
         await populateUserData();
         await handleAulasPage();
+    }
+
+    // Lógica específica para a página de videoaulas
+    if (hash.startsWith('#summarys')) {
+        await populateUserData();
+        await loadSupportData();
+        await loadMateriasWithoutProgress();
+    }
+
+    // Lógica específica para a página de videoaulas por materias
+    else if (hash.startsWith('#subject/summarys')) {
+        await populateUserData();
+        attachClassPageListeners();
+        await handleResumosListPage();
+    }
+
+    else if (hash.startsWith('#subject/summary-detail')) {
+        await populateUserData();
+        await handleResumoDetailPage();
     }
 }
 
@@ -216,6 +264,35 @@ async function fetchAulasPorMateria(materiaId) {
     }
 }
 
+/**
+ * Busca a LISTA de resumos para uma matéria específica.
+ */
+async function fetchResumosPorMateria(materiaId) {
+    const url = `${API_BASE_URL}/api/v1/resumo/by-materia/${materiaId}`;
+    try {
+        const response = await fetch(url, { credentials: 'include' });
+        if (!response.ok) throw new Error('Falha ao buscar a lista de resumos.');
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
+/**
+ * Busca os dados de UM ÚNICO resumo pelo seu ID.
+ */
+async function fetchResumoPorId(resumoId) {
+    const url = `${API_BASE_URL}/api/v1/resumo/${resumoId}`;
+    try {
+        const response = await fetch(url, { credentials: 'include' });
+        if (!response.ok) throw new Error('Falha ao buscar o resumo.');
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
 
 /**
  * Busca a lista de todas as matérias da API.
@@ -337,7 +414,28 @@ async function loadMaterias() {
         const materiasComProgresso = await response.json();
 
         // 3. Renderiza os cards com os dados recebidos.
-        renderMateriasCards(materiasComProgresso);
+        renderMateriasCardsWithProgress(materiasComProgresso);
+
+    } catch (error) {
+        console.error('Erro ao carregar matérias:', error);
+    }
+}
+
+/**
+ * Carrega a lista de matérias COM O PROGRESSO do usuário.
+ */
+async function loadMateriasWithoutProgress() {
+    // 1. A URL agora aponta para o novo endpoint que já calcula o progresso.
+    const url = `${API_BASE_URL}/api/v1/materias/meu-progresso`;
+
+    try {
+        const response = await fetch(url, {
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error('Falha ao carregar matérias sem progresso.');
+        const materiasComProgresso = await response.json();
+
+        renderMateriasCardsWithNoProgress(materiasComProgresso);
 
     } catch (error) {
         console.error('Erro ao carregar matérias:', error);
@@ -397,7 +495,13 @@ function updateBodyClass(hash) {
         document.body.className = 'classes-view';
     } else if (hash.startsWith('#subject/video-class')) {
         document.body.className = 'classes-view';
-    }else {
+    } else if (hash.startsWith('#summarys')) {
+        document.body.className = 'summarys-view';
+    } else if (hash.startsWith('#subject/summarys')) {
+        document.body.className = 'summarys-view';
+    } else if (hash.startsWith('#subject/summary-detail')) {
+        document.body.className = 'summarys-view';
+    } else {
         document.body.className = 'auth-view';
     }
 }
@@ -801,7 +905,6 @@ async function handleForgotPasswordSubmit(event) {
  * (Versão completa e final)
  */
 async function handleAulasPage() {
-    console.log("Página de Aulas carregada, executando lógica específica...");
 
     // 1. Pega o ID da matéria da URL e os elementos do DOM
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
@@ -889,6 +992,74 @@ async function handleAulasPage() {
 }
 
 /**
+ * Lida com a PÁGINA DE LISTA de resumos.
+ */
+async function handleResumosListPage() {
+    const params = new URLSearchParams(window.location.hash.split('?')[1]);
+    const materiaId = params.get('materiaId');
+    const container = document.getElementById('resumos-list-container');
+
+    if (!container) return;
+    if (!materiaId) {
+        container.innerHTML = "<p>ID da matéria não fornecido.</p>";
+        return;
+    }
+
+    container.innerHTML = "<p>Carregando resumos...</p>";
+    const resumos = await fetchResumosPorMateria(materiaId);
+
+    if (resumos.length > 0) {
+        const materiaNome = resumos[0].materia.nome; // Pega o nome da matéria do primeiro resumo
+        document.querySelector('.main-container h1').textContent = `Resumos > ${materiaNome}`;
+
+        const listHtml = resumos.map(resumo => `
+            <li>
+                <a href="#subject/summary-detail?id=${resumo.id}" class="resumo-link-item">
+                    <span class="resumo-titulo">${resumo.titulo}</span>
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </a>
+            </li>
+        `).join('');
+        container.innerHTML = `<ul class="resumo-list">${listHtml}</ul>`;
+    } else {
+        container.innerHTML = "<p>Nenhum resumo encontrado para esta matéria.</p>";
+    }
+}
+
+/**
+ * Lida com a PÁGINA DE DETALHE de um resumo.
+ */
+async function handleResumoDetailPage() {
+    const params = new URLSearchParams(window.location.hash.split('?')[1]);
+    const resumoId = params.get('id');
+    const container = document.getElementById('resumo-detail-container');
+
+    if (!container) return;
+    if (!resumoId) {
+        container.innerHTML = "<p>ID do resumo não fornecido.</p>";
+        return;
+    }
+
+    container.innerHTML = "<p>Carregando resumo...</p>";
+    const resumo = await fetchResumoPorId(resumoId);
+
+    if (resumo) {
+        // Usa a biblioteca marked.js que configuramos antes
+        const conteudoFormatado = marked.parse(resumo.conteudo);
+
+        container.innerHTML = `
+            <h1 class="resumo-title">${resumo.titulo}</h1>
+            <div class="materia-tag">${resumo.materia.nome}</div>
+            <article class="resumo-content">
+                ${conteudoFormatado}
+            </article>
+        `;
+    } else {
+        container.innerHTML = "<p>Resumo não encontrado.</p>";
+    }
+}
+
+/**
  * Converte uma URL de visualização do YouTube para uma URL de 'embed'.
  * @param {string} url - A URL original do YouTube (ex: .../watch?v=VIDEO_ID).
  * @returns {string} - A URL no formato 'embed' (ex: .../embed/VIDEO_ID).
@@ -926,3 +1097,12 @@ window.addEventListener('hashchange', handleRouteChange);
 
 // Carrega a página inicial quando o DOM está pronto.
 document.addEventListener('DOMContentLoaded', handleRouteChange);
+
+/**
+ * Seta as configurações do scripto Marked.js.
+ * @Type {configurable}
+ */
+marked.setOptions({
+    gfm: true,
+    breaks: true
+});

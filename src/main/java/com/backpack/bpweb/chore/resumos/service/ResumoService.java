@@ -12,6 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ResumoService {
 
@@ -64,6 +67,18 @@ public class ResumoService {
             throw new NullPointerException("Nenhum resumo encontrado com os filtros definidos.");
         }
         return resumoPage.map(ResumoResponseDTO::new);
+    }
+
+    // public
+    public List<ResumoResponseDTO> findAllResumosByMateriaId(Integer materiaId) {
+        List<Resumo> resumos = repository.findAllByMateriaId(materiaId);
+        if (resumos.isEmpty()) {
+            throw new EntityNotFoundException("Nenhum resumo encontrado com o id da materia informado.");
+        }
+        return resumos
+                .stream()
+                .map(ResumoResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
     // Método auxiliar para mapear um DTO para Entity

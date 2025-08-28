@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/resumo")
 public class ResumoController {
@@ -24,6 +26,16 @@ public class ResumoController {
             Page<ResumoResponseDTO> resumoPage = resumoService.findResumoWithFilters(materiaId, searchTerm, pageable);
             return ResponseEntity.ok(resumoPage);
         } catch (NullPointerException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/by-materia/{materiaId}")
+    public ResponseEntity<?> findResumosByMateriaId(@PathVariable(value = "materiaId") Integer materiaId) {
+        try {
+            List<ResumoResponseDTO> resumos = resumoService.findAllResumosByMateriaId(materiaId);
+            return ResponseEntity.ok(resumos);
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

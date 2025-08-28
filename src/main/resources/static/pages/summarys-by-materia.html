@@ -29,7 +29,7 @@
                 <button class="mobile-menu-btn" id="mobile-menu-btn">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                 </button>
-                <h1>Meu Dashboard</h1>
+                <h1>Resumos</h1>
             </div>
             <div class="header-right">
                 <div class="notification-bell">
@@ -49,69 +49,11 @@
             <!-- ID adicionado para a saudação -->
             <div class="welcome-banner" id="welcome-banner">
                 <h2>Olá, ... 👋</h2>
-                <p>Pronto para mais um dia de estudos? Não desista, seu esforço será recompensado!</p>
+                <p>Leia os resumos da nossa plataforma abaixo!</p>
             </div>
 
-            <div class="content-grid">
-                <div class="card stat-card">
-                    <h3>Aulas Assistidas</h3>
-                    <p>O total de aulas que você já concluiu.</p>
-                    <div class="stat-number" id="stat-aulas-vistas">...</div>
-                </div>
-
-                <div class="card stat-card">
-                    <h3>Aulas Pendentes</h3>
-                    <p>Continue para zerar este número!</p>
-                    <div class="stat-number" id="stat-aulas-pendentes">...</div>
-                </div>
-
-                <div class="card stat-card">
-                    <h3>Média Diária</h3>
-                    <p>Aulas assistidas por dia, em média.</p>
-                    <div class="stat-number" id="stat-media-diaria">...</div>
-                </div>
-
-                <div class="card stat-card">
-                    <h3>Total de Aulas</h3>
-                    <p>O número total de aulas na plataforma.</p>
-                    <div class="stat-number" id="stat-total-aulas">...</div>
-                </div>
-
-                <!--
-                <div class="card">
-                    <h3>Última Conquista</h3>
-                    <div class="achievement">
-                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-                        <div class="achievement-details">
-                            <h4>Mestre dos Verbos</h4>
-                            <p>Completou 100 flashcards de verbos irregulares.</p>
-                        </div>
-                    </div>
-                    <a href="#perfil" class="card-link">Ver todas as conquistas</a>
-                </div>
-                -->
-
-                <div class="card card-full">
-                    <h3>Acesso Rápido</h3>
-                    <div class="quick-access">
-                        <a href="#video-class" class="quick-access-item">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                            <span>Assistir Aulas</span>
-                        </a>
-                        <a href="#flashcards" class="quick-access-item">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                            <span>Revisar Flashcards</span>
-                        </a>
-                        <a href="#simulados" class="quick-access-item">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
-                            <span>Novo Simulado</span>
-                        </a>
-                        <a href="#forum" class="quick-access-item">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            <span>Ir para o Fórum</span>
-                        </a>
-                    </div>
-                </div>
+            <div class="content-container" id="resumos-list-container">
+                <p>Carregando...</p>
             </div>
         </main>
     </div>
