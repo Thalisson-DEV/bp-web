@@ -32,6 +32,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").permitAll()
                         .requestMatchers(HttpMethod.GET, "api/v1/progresso/aulas").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/v1/progresso/aulas").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ai/gemini/async/desempenho").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
