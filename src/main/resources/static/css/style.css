@@ -365,7 +365,7 @@ body.auth-view {
     text-align: left; /* Alinha o número à esquerda do card */
     line-height: 1;
     margin-bottom: 1rem;
-    margin-top: 0.5rem;
+    margin-top: 0.2rem;
 }
 
 .content-grid .card {
@@ -396,7 +396,7 @@ body.auth-view {
 
 .card-link {
     display: inline-block;
-    margin-top: 20px;
+    margin-top: 5px;
     color: var(--primary-color);
     text-decoration: none;
     font-weight: 600;
@@ -825,7 +825,7 @@ body.auth-view {
 }
 
 #resumo-detail-container {
-    backgroud-color: #ffffff;
+    background-color: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 2rem;
@@ -912,6 +912,31 @@ body.auth-view {
 
 .resumo-content tbody tr:hover {
     background-color: #f1f1f1; /* Efeito ao passar o mouse */
+}
+
+/* Selo de "Lido" na lista */
+.status-badge.lido {
+    background-color: #e6f4ea;
+    color: #34a853;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+    margin-left: auto;
+    margin-right: 1rem;
+}
+
+/* Informações na página de detalhe */
+.meta-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.data-leitura {
+    font-size: 0.9rem;
+    color: var(--text-light);
 }
 
 /* ========================================================= */
