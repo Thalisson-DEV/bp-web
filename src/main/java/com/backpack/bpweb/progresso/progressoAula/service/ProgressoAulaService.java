@@ -9,7 +9,7 @@ import com.backpack.bpweb.progresso.progressoAula.repository.ProgressoAulaReposi
 import com.backpack.bpweb.progresso.progressoAula.statusProgressoAula.entity.StatusProgressoAula;
 import com.backpack.bpweb.progresso.progressoAula.statusProgressoAula.repository.StatusProgressoAulaRepository;
 import com.backpack.bpweb.user.entity.Usuarios;
-import com.backpack.bpweb.user.estatistica.EstatisticasUsuarioDTO;
+import com.backpack.bpweb.user.estatistica.DTOs.EstatisticasAulasUsuarioDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.security.auth.message.AuthException;
 import jakarta.transaction.Transactional;
@@ -62,7 +62,7 @@ public class ProgressoAulaService {
         return new ProgressoAulaUpdateRequestDTO(progressoSalvo.getStatus().getNome());
     }
 
-    public EstatisticasUsuarioDTO calcularEstatisticasDoUsuario() throws AuthException {
+    public EstatisticasAulasUsuarioDTO calcularEstatisticasDoUsuario() throws AuthException {
         Usuarios usuarioLogado = getUsuarioLogado();
 
         long aulasVistas = progressoAulaRepository.countByUsuarioAndStatus_nome(usuarioLogado, "CONCLUIDO");
@@ -85,7 +85,7 @@ public class ProgressoAulaService {
             mediaAulasPorDia = (double) aulasVistas / diasDeAtividade;
         }
 
-        return new EstatisticasUsuarioDTO(aulasVistas, aulasPendentes, totalAulas, mediaAulasPorDia);
+        return new EstatisticasAulasUsuarioDTO(aulasVistas, aulasPendentes, totalAulas, mediaAulasPorDia);
     }
 
     private Usuarios getUsuarioLogado() throws AuthException {

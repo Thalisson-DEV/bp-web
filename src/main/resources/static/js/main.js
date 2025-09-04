@@ -280,6 +280,47 @@ async function fetchResumosPorMateria(materiaId) {
 }
 
 /**
+ * Busca o progresso de todos os resumos para o usuário logado.
+ * Retorna um mapa para consulta rápida: { resumoId: "dataDeLeitura" }
+ */
+async function fetchProgressoResumos() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/progresso-resumo`, { // Confirme a URL base
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error('Falha ao buscar progresso dos resumos');
+
+        const progressos = await response.json();
+        // Transforma o array em um mapa para acesso rápido
+        return progressos.reduce((map, progresso) => {
+            map[progresso.resumoId] = progresso.dataVisualizacao;
+            return map;
+        }, {});
+    } catch (error) {
+        console.error(error);
+        return {};
+    }
+}
+
+/**
+ * Envia uma requisição para marcar um resumo como lido.
+ * @param {number} resumoId - O ID do resumo a ser marcado.
+ */
+async function marcarResumoComoLido(resumoId) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/progresso-resumo/${resumoId}`, { // Confirme a URL base
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (!response.ok) throw new Error('Falha ao marcar resumo como lido');
+        return await response.json();
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+/**
  * Busca os dados de UM ÚNICO resumo pelo seu ID.
  */
 async function fetchResumoPorId(resumoId) {
@@ -542,28 +583,30 @@ async function populateUserData() {
  * @param {EstatisticasUsuarioDTO} estatisticas - O objeto com os dados vindo da API.
  */
 function populateDashboardStats(estatisticas) {
-    // Seleciona os elementos pelos IDs que criamos
+    // Seleciona os elementos das AULAS
     const elAulasVistas = document.getElementById('stat-aulas-vistas');
     const elAulasPendentes = document.getElementById('stat-aulas-pendentes');
-    const elMediaDiaria = document.getElementById('stat-media-diaria');
-    const elTotalAulas = document.getElementById('stat-total-aulas');
 
-    if (estatisticas) {
-        // Formata a média para ter no máximo 2 casas decimais
-        const mediaFormatada = estatisticas.mediaAulasPorDia.toFixed(2);
+    // Seleciona os elementos dos RESUMOS
+    const elResumosLidos = document.getElementById('stat-resumos-lidos');
+    const elResumosPendentes = document.getElementById('stat-resumos-pendentes');
 
-        // Atualiza o conteúdo de cada elemento
-        if (elAulasVistas) elAulasVistas.textContent = estatisticas.aulasVistas;
-        if (elAulasPendentes) elAulasPendentes.textContent = estatisticas.aulasPendentes;
-        if (elMediaDiaria) elMediaDiaria.textContent = mediaFormatada;
-        if (elTotalAulas) elTotalAulas.textContent = estatisticas.totalAulas;
+    if (estatisticas && estatisticas.aulas && estatisticas.resumos) {
+
+        // Popula os cards de AULAS
+        if (elAulasVistas) elAulasVistas.textContent = estatisticas.aulas.aulasVistas;
+        if (elAulasPendentes) elAulasPendentes.textContent = estatisticas.aulas.aulasPendentes;
+
+        // Popula os cards de RESUMOS
+        if (elResumosLidos) elResumosLidos.textContent = estatisticas.resumos.resumosCompletados;
+        if (elResumosPendentes) elResumosPendentes.textContent = estatisticas.resumos.resumosPendentes;
+
     } else {
-        // Caso ocorra um erro na API, exibe uma mensagem de falha
         const errorMessage = 'N/D';
         if (elAulasVistas) elAulasVistas.textContent = errorMessage;
         if (elAulasPendentes) elAulasPendentes.textContent = errorMessage;
-        if (elMediaDiaria) elMediaDiaria.textContent = errorMessage;
-        if (elTotalAulas) elTotalAulas.textContent = errorMessage;
+        if (elResumosLidos) elResumosLidos.textContent = errorMessage;
+        if (elResumosPendentes) elResumosPendentes.textContent = errorMessage;
     }
 }
 
@@ -992,70 +1035,122 @@ async function handleAulasPage() {
 }
 
 /**
- * Lida com a PÁGINA DE LISTA de resumos.
+ * Lida com a PÁGINA DE LISTA de resumos de uma matéria específica.
+ * Busca os resumos e o progresso do usuário para exibir o status de leitura.
  */
 async function handleResumosListPage() {
+    console.log("Carregando página de lista de resumos...");
+
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
     const materiaId = params.get('materiaId');
     const container = document.getElementById('resumos-list-container');
+    const pageTitle = document.querySelector('.main-container h1');
 
-    if (!container) return;
+    // Validações iniciais
+    if (!container) {
+        console.error("Container com id='resumos-list-container' não encontrado.");
+        return;
+    }
     if (!materiaId) {
-        container.innerHTML = "<p>ID da matéria não fornecido.</p>";
+        container.innerHTML = "<p>ID da matéria não fornecido na URL.</p>";
         return;
     }
 
+    // Feedback visual de carregamento
     container.innerHTML = "<p>Carregando resumos...</p>";
-    const resumos = await fetchResumosPorMateria(materiaId);
+    if (pageTitle) pageTitle.textContent = "Carregando...";
 
-    if (resumos.length > 0) {
-        const materiaNome = resumos[0].materia.nome; // Pega o nome da matéria do primeiro resumo
-        document.querySelector('.main-container h1').textContent = `Resumos > ${materiaNome}`;
+    // Otimização: Busca a lista de resumos e a lista de progressos em paralelo
+    const [resumos, progressos] = await Promise.all([
+        fetchResumosPorMateria(materiaId),
+        fetchProgressoResumos()
+    ]);
 
-        const listHtml = resumos.map(resumo => `
+    if (resumos && resumos.length > 0) {
+        // Atualiza o título da página com o nome da matéria
+        const materiaNome = resumos[0].materia.nome;
+        if (pageTitle) pageTitle.textContent = `Resumos de ${materiaNome}`;
+
+        // Gera o HTML da lista
+        const listHtml = resumos.map(resumo => {
+            // Verifica se o ID deste resumo existe no mapa de progressos
+            const foiLido = progressos.hasOwnProperty(resumo.id);
+
+            return `
             <li>
                 <a href="#subject/summary-detail?id=${resumo.id}" class="resumo-link-item">
                     <span class="resumo-titulo">${resumo.titulo}</span>
-                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <div class="resumo-meta">
+                        ${foiLido ? '<span class="status-badge lido">Lido ✓</span>' : ''}
+                        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
                 </a>
             </li>
-        `).join('');
+        `;
+        }).join('');
         container.innerHTML = `<ul class="resumo-list">${listHtml}</ul>`;
     } else {
+        if (pageTitle) pageTitle.textContent = "Resumos";
         container.innerHTML = "<p>Nenhum resumo encontrado para esta matéria.</p>";
     }
 }
 
 /**
- * Lida com a PÁGINA DE DETALHE de um resumo.
+ * Lida com a PÁGINA DE DETALHE de um resumo específico.
+ * Marca o resumo como lido e exibe seu conteúdo formatado.
  */
 async function handleResumoDetailPage() {
+    console.log("Carregando página de detalhe do resumo...");
+
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
     const resumoId = params.get('id');
     const container = document.getElementById('resumo-detail-container');
 
-    if (!container) return;
+    // Validações iniciais
+    if (!container) {
+        console.error("Container com id='resumo-detail-container' não encontrado.");
+        return;
+    }
     if (!resumoId) {
-        container.innerHTML = "<p>ID do resumo não fornecido.</p>";
+        container.innerHTML = "<p>ID do resumo não fornecido na URL.</p>";
         return;
     }
 
+    // Feedback visual de carregamento
     container.innerHTML = "<p>Carregando resumo...</p>";
-    const resumo = await fetchResumoPorId(resumoId);
+
+    // Otimização: Busca os dados do resumo e marca o progresso em paralelo
+    const [resumo, progresso] = await Promise.all([
+        fetchResumoPorId(resumoId),
+        marcarResumoComoLido(resumoId)
+    ]);
 
     if (resumo) {
-        // Usa a biblioteca marked.js que configuramos antes
+        // Usa a biblioteca marked.js para formatar o conteúdo
         const conteudoFormatado = marked.parse(resumo.conteudo);
 
+        let dataLeituraHtml = '';
+        // Verifica se o progresso foi marcado/retornado com sucesso
+        if (progresso && progresso.dataVisualizacao) {
+            const dataLeituraFormatada = new Date(progresso.dataVisualizacao).toLocaleDateString('pt-BR', {
+                day: '2-digit', month: 'long', year: 'numeric'
+            });
+            dataLeituraHtml = `<span class="data-leitura">Lido em: ${dataLeituraFormatada}</span>`;
+        }
+
+        // Monta o HTML final da página
         container.innerHTML = `
             <h1 class="resumo-title">${resumo.titulo}</h1>
-            <div class="materia-tag">${resumo.materia.nome}</div>
+            <div class="meta-info">
+                <span class="materia-tag">${resumo.materia.nome}</span>
+                ${dataLeituraHtml}
+            </div>
             <article class="resumo-content">
                 ${conteudoFormatado}
             </article>
         `;
     } else {
-        container.innerHTML = "<p>Resumo não encontrado.</p>";
+        container.innerHTML = "<p>Resumo não encontrado ou falha ao carregar.</p>";
     }
 }
 
