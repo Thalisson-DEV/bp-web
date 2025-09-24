@@ -1,0 +1,1 @@
+ALTER TABLE alternativas DROP COLUMN is_correta;
