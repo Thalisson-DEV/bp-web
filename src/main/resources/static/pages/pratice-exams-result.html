@@ -1,0 +1,105 @@
+<div class="dashboard-layout">
+
+    <!-- Menu Lateral (Sidebar) -->
+    <nav class="sidebar-nav" id="sidebar-nav">
+        <div class="sidebar-header">
+            <img src="/assets/logo-v1.png" alt="Backpack Logo" class="sidebar-logo">
+        </div>
+        <ul class="nav-links">
+            <!-- Ícones SVG substituindo as tags <i> -->
+            <li><a href="#dashboard" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg> <span>Início</span></a></li>
+            <li><a href="#summarys" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> <span>Resumos</span></a></li>
+            <li><a href="#flashcards" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> <span>Flashcards</span></a></li>
+            <li><a href="#video-class" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> <span>Videoaulas</span></a></li>
+            <li><a href="#hypes" class="nav-link"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M4 14l10-10l-2 10h8l-10 10l2-10H4Z"></path></svg> <span>BP Hypes</span></a></li>
+            <li><a href="#pratice-exam" class="nav-link active"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg> <span>Simulados</span></a></li>
+            <li><a href="#metas" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> <span>Meta Semanal</span></a></li>
+            <li><a href="#forum" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> <span>Fórum</span></a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <a href="#perfil" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span>Meu Perfil</span></a>
+            <a href="#" onclick="logout()" class="nav-link"><svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> <span>Sair</span></a>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <div class="main-container">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <button class="mobile-menu-btn" id="mobile-menu-btn">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <h1>Resultado do Simulado</h1>
+            </div>
+            <div class="header-right">
+                <div class="notification-bell">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="notification-badge">0</span>
+                </div>
+                <div class="user-profile">
+                    <img src="https://placehold.co/40x40/004aad/white?text=A" alt="User Avatar" class="user-avatar" id="user-avatar">
+                    <span class="user-name" id="header-user-name">Carregando...</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="welcome-banner-mini" id="welcome-banner">
+                <h2>Olá, ... 👋</h2>
+                <p>Veja seu desempenho e aprenda com os resultados!</p>
+            </div>
+
+            <div class="resultado-container">
+                <div class="resultado-summary card">
+                    <div class="resultado-score">
+                        <div class="pontuacao-circulo">
+                            <span id="pontuacao-final">0%</span>
+                        </div>
+                        <div class="pontuacao-detalhes">
+                            <h3>Seu Desempenho</h3>
+                            <p>Você acertou <strong id="total-acertos">0</strong> de <strong id="total-questoes">10</strong> questões.</p>
+                            <div class="badge-container">
+                                <span class="badge" id="badge-desempenho">Bom trabalho!</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="resultado-acoes">
+                        <button id="btn-compartilhar" class="btn-secondary">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                            Compartilhar
+                        </button>
+                        <button id="btn-imprimir" class="btn-secondary">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Revisão das Questões</h2>
+
+                <div id="revisao-questoes-container">
+                    <!-- O conteúdo será inserido dinamicamente pelo JavaScript -->
+                    <div class="loading-placeholder">
+                        <div class="spinner"></div>
+                        <p>Carregando revisão...</p>
+                    </div>
+                </div>
+
+                <!-- Adicionamos o modal de análise com IA -->
+                <div class="ai-modal-overlay" id="ai-modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Análise do bp</h3>
+                            <button id="ai-modal-close" class="modal-close-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                        <div id="ai-modal-body" class="modal-body">
+                            <!-- Conteúdo da análise será inserido aqui -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
