@@ -1,31 +1,24 @@
-# ----------------------------
-# Etapa 1: Build da aplicação
-# ----------------------------
-FROM maven:3.9.6-eclipse-temurin-21 AS build
-
+# Etapa 1 - Build
+FROM eclipse-temurin:24-jdk AS build
 WORKDIR /app
 
-# Copia o pom.xml e baixa dependências antes de copiar o código (cache eficiente)
+# Copia o pom.xml e baixa as dependências primeiro (cache de build)
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copia o código-fonte e realiza o build
+# Copia o restante do código e compila o projeto
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# ----------------------------
-# Etapa 2: Imagem final
-# ----------------------------
-FROM eclipse-temurin:21-jre
-
+# Etapa 2 - Execução
+FROM eclipse-temurin:24-jre
 WORKDIR /app
 
-# Copia o JAR da etapa anterior
+# Copia o .jar gerado da etapa de build
 COPY --from=build /app/target/*.jar app.jar
 
-# Define variável de ambiente padrão da porta
-ENV PORT=8080
+# Expõe a porta padrão do Spring Boot
 EXPOSE 8080
 
-# Comando de inicialização
+# Comando para rodar a aplicação
 ENTRYPOINT ["java", "-jar", "app.jar"]
