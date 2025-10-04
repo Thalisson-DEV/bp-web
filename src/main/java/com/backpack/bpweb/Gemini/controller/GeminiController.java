@@ -4,10 +4,7 @@ import com.backpack.bpweb.Gemini.DTOs.UserDesempenhoRequestDTO;
 import com.backpack.bpweb.Gemini.service.GeminiService;
 import com.backpack.bpweb.Gemini.service.PromptBuilderService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -24,9 +21,15 @@ public class GeminiController {
 
 
     @GetMapping("/async/desempenho")
-    public ResponseEntity<Mono<String>> analisarDesempenhoAsync(@RequestBody UserDesempenhoRequestDTO desempenho) {
+    public ResponseEntity<String> analisarDesempenhoSync(@RequestBody UserDesempenhoRequestDTO desempenho) {
         String prompt = promptBuilderService.montarPrompt(desempenho.estatisticas());
-        Mono<String> resposta = geminiService.analisarDesempenhoAsync(prompt, desempenho.estatisticas());
+        String resposta = geminiService.analisarDesempenhoSync(prompt, desempenho.estatisticas());
+        return ResponseEntity.ok(resposta);
+    }
+
+    @PostMapping("/sync/analise-questao")
+    public ResponseEntity<String> analisarQuestaoSync(@RequestBody String prompt) {
+        String resposta = geminiService.analisarQuestaoSync(prompt);
         return ResponseEntity.ok(resposta);
     }
 }

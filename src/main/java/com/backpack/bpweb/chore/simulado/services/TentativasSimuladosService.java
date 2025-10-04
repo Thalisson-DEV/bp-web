@@ -7,6 +7,8 @@ import com.backpack.bpweb.chore.simulado.dto.TentativasSimuladosResponseDTO;
 import com.backpack.bpweb.user.entity.Usuarios;
 import com.backpack.bpweb.user.repositories.UsuariosRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.security.auth.message.AuthException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +48,22 @@ public class TentativasSimuladosService {
         return new TentativasSimuladosResponseDTO(tentativa);
     }
 
+    public List<TentativasSimuladosResponseDTO> findAllTentativasByUsuarioId(Integer usuarioId) {
+        List<TentativasSimulados> tentativas = tentativasSimuladosRepository.findAllByUsuarioIdOrderByDataInicioDesc(usuarioId);
+        return tentativas.stream()
+                .map(TentativasSimuladosResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<TentativasSimuladosResponseDTO> buscarHistoricoDoUsuarioLogado() throws AuthException {
+        Usuarios usuarioLogado = getUsuarioLogado();
+        List<TentativasSimulados> tentativas = tentativasSimuladosRepository.findAllByUsuarioIdOrderByDataInicioDesc(usuarioLogado.getId());
+        
+        return tentativas.stream()
+                .map(TentativasSimuladosResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public TentativasSimuladosResponseDTO createNewTentativa(TentativasSimuladosDTO dto) {
         TentativasSimulados tentativa = new TentativasSimulados();
@@ -76,6 +94,16 @@ public class TentativasSimuladosService {
             throw new EntityNotFoundException("Tentativa não encontrada com o id: " + id);
         }
         tentativasSimuladosRepository.deleteById(id);
+    }
+
+    private Usuarios getUsuarioLogado() throws AuthException {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated() || !(auth.getPrincipal() instanceof Usuarios)) {
+            throw new AuthException("Usuário não autenticado ou sessão inválida.");
+        }
+
+        return (Usuarios) auth.getPrincipal();
     }
 
     private void mapDtoToEntity(TentativasSimuladosDTO dto, TentativasSimulados entity) {

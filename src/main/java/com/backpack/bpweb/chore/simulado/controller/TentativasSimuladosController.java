@@ -4,6 +4,7 @@ import com.backpack.bpweb.chore.simulado.dto.TentativasSimuladosDTO;
 import com.backpack.bpweb.chore.simulado.dto.TentativasSimuladosResponseDTO;
 import com.backpack.bpweb.chore.simulado.services.TentativasSimuladosService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.security.auth.message.AuthException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,12 @@ public class TentativasSimuladosController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/meu-historico")
+    public ResponseEntity<List<TentativasSimuladosResponseDTO>> getMeuHistorico() throws AuthException {
+        List<TentativasSimuladosResponseDTO> historico = tentativasSimuladosService.buscarHistoricoDoUsuarioLogado();
+        return ResponseEntity.ok(historico);
     }
 
     @PostMapping

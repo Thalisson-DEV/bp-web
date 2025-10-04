@@ -50,6 +50,29 @@ public class GeminiService {
                 : "Sem resposta do modelo";
     }
 
+    public String analisarQuestaoSync(String prompt) {
+        String mensagem = prompt;
+
+        Map<String, Object> requestBody = Map.of(
+                "contents", new Object[]{
+                        Map.of("parts", new Object[]{
+                                Map.of("text", mensagem)
+                        })
+                }
+        );
+
+        GeminiResponseDTO response = webClient.post()
+                .uri(geminiUrl + "?key=" + apiKey)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(GeminiResponseDTO.class)
+                .block();
+
+        return response != null && !response.candidates().isEmpty()
+                ? response.candidates().get(0).content().parts().get(0).text()
+                : "Sem resposta do modelo";
+    }
+
     public Mono<String> analisarDesempenhoAsync(String prompt, EstatisticasUsuarioDTO desempenho) {
         String mensagem = prompt + "\n\n" + desempenho.toString();
 
@@ -60,6 +83,8 @@ public class GeminiService {
                         })
                 }
         );
+
+
 
         return webClient.post()
                 .uri(geminiUrl + "?key=" + apiKey)
