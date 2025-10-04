@@ -2814,7 +2814,7 @@ a:focus-visible {
         transparent
     );
     transform: rotate(45deg);
-    animation: shine 3s infinite;
+    animation: shine 3s;
 }
 
 @keyframes shine {

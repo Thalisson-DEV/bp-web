@@ -1,1 +1,1 @@
-ALTER TABLE alternativas DROP COLUMN is_correta;
+ALTER TABLE alternativas DROP COLUMN IF EXISTS is_correta;
