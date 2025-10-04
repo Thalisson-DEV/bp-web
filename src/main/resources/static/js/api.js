@@ -26,8 +26,6 @@ async function registerUser(userData) {
         } catch (e) {
             errorMessage = errorText || `Erro HTTP! Status: ${response.status}`;
         }
-
-        console.error('Erro no registro:', errorMessage);
         throw new Error(errorMessage);
     }
 }

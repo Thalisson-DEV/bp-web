@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/x-icon" href="assets/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -16,7 +17,20 @@
 
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
+<script src="js/mobile-menu.js"></script>
+<script src="js/microinteractions.js"></script>
 <script src="js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<div class="ai-modal-overlay" id="ai-modal" style="display: none;">
+    <div class="ai-modal-content">
+        <button class="ai-modal-close-btn" id="ai-modal-close">&times;</button>
+        <div class="ai-modal-header">
+            <h3>Análise do bp</h3>
+        </div>
+        <div class="ai-modal-body" id="ai-modal-body">
+        </div>
+    </div>
+</div>
 </body>
 </html>

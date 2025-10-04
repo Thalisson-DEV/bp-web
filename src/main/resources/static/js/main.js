@@ -44,6 +44,14 @@ let currentFilters = {
     materiaId: ''
 };
 
+let estadoSimuladoAtivo = {
+    tentativaId: null,
+    questoes: [],
+    respostasUsuario: {}, // { topicoId: alternativaId }
+    questaoAtual: 0,
+    resultado: null
+};
+
 // =================================================================
 // --- Roteamento ---
 // =================================================================
@@ -61,7 +69,10 @@ const routes = {
     '#subject/video-class': 'pages/class-list.html',
     '#summarys': 'pages/summarys.html',
     '#subject/summarys': 'pages/summarys-by-materia.html',
-    '#subject/summary-detail': 'pages/summary-detail.html'
+    '#subject/summary-detail': 'pages/summary-detail.html',
+    '#pratice-exam': 'pages/pratice-exams.html',
+    '#pratice-exam/active': 'pages/pratice-exams-active.html',
+    '#pratice-exam/result': 'pages/pratice-exams-result.html',
 };
 
 /**
@@ -98,9 +109,15 @@ async function loadPage(url) {
         executePageScripts();
         attachCommonFormListeners();
         await attachPageSpecificLogic();
+        
+        // Reinicializar o menu mobile após carregar a nova página
+        if (window.MobileMenu) {
+            setTimeout(() => {
+                window.MobileMenu.init();
+            }, 100);
+        }
 
     } catch (error) {
-        console.error('Erro ao carregar a página:', error);
         appRoot.innerHTML = `<p style="text-align: center; margin-top: 2rem;">Erro 404: Página não encontrada.</p>`;
     }
 }
@@ -136,6 +153,149 @@ function renderMateriasCardsWithProgress(materias) {
     gridContainer.innerHTML = cardsHtml;
 }
 
+// Função para carregar o histórico de simulados do usuário logado
+async function carregarHistoricoSimulados() {
+    try {
+        // Faz requisição para buscar o histórico do usuário logado
+        const response = await fetch('/api/tentativas-simulados/meu-historico', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include' // Importante para incluir cookies de autenticação
+        });
+
+        if (response.status === 401 || response.status === 403) {
+            console.error('Usuário não autenticado');
+            mostrarMensagemErro('Você precisa estar logado para ver o histórico.');
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error('Erro ao carregar histórico de simulados');
+        }
+
+        const historico = await response.json();
+
+        // Exibe o histórico na página
+        exibirHistoricoSimulados(historico);
+    } catch (error) {
+        console.error('Erro ao carregar histórico:', error);
+        mostrarMensagemErro('Não foi possível carregar o histórico de simulados.');
+    }
+}
+
+// Função para exibir o histórico na tela
+function exibirHistoricoSimulados(historico) {
+    const container = document.querySelector('.simulado-historico');
+
+    if (!container) {
+        console.error('Container de histórico não encontrado');
+        return;
+    }
+
+    // Remove a mensagem de placeholder
+    const placeholderMsg = container.querySelector('.placeholder-message');
+    if (placeholderMsg) {
+        placeholderMsg.remove();
+    }
+
+    // Se não houver histórico, mostra mensagem
+    if (!historico || historico.length === 0) {
+        container.innerHTML = `
+            <h3>Histórico de Simulados</h3>
+            <p class="placeholder-message">Você ainda não realizou nenhum simulado.</p>
+        `;
+        return;
+    }
+
+    // Cria a lista de simulados
+    let historicoHTML = '<h3>Histórico de Simulados</h3>';
+    historicoHTML += '<div class="historico-lista">';
+
+    historico.forEach(tentativa => {
+        const dataInicio = new Date(tentativa.dataInicio);
+        const dataFim = tentativa.dataFim ? new Date(tentativa.dataFim) : null;
+        const pontuacao = tentativa.pontuacaoFinal ? tentativa.pontuacaoFinal.toFixed(2) : 'N/A';
+
+        // Calcula o status
+        const status = dataFim ? 'Concluído' : 'Em andamento';
+        const statusClass = dataFim ? 'concluido' : 'em-andamento';
+
+        historicoHTML += `
+            <div class="historico-item ${statusClass}">
+                <div class="historico-info">
+                    <div class="historico-data">
+                        <strong>Data:</strong> ${formatarData(dataInicio)}
+                    </div>
+                    <div class="historico-status">
+                        <span class="badge badge-${statusClass}">${status}</span>
+                    </div>
+                </div>
+                <div class="historico-detalhes">
+                    ${dataFim ? `
+                        <div class="historico-pontuacao">
+                            <strong>Pontuação:</strong> ${pontuacao}%
+                        </div>
+                        <div class="historico-duracao">
+                            <strong>Concluído em:</strong> ${formatarData(dataFim)}
+                        </div>
+                    ` : `
+                        <div class="historico-em-progresso">
+                            <em>Simulado ainda em andamento</em>
+                        </div>
+                    `}
+                </div>
+                ${dataFim ? `
+                    <button class="btn-detalhes" onclick="verDetalhesSimulado(${tentativa.id})">
+                        Ver Detalhes
+                    </button>
+                ` : ''}
+            </div>
+        `;
+    });
+
+    historicoHTML += '</div>';
+    container.innerHTML = historicoHTML;
+}
+
+// Função auxiliar para formatar data
+function formatarData(data) {
+    const d = new Date(data);
+    const dia = String(d.getDate()).padStart(2, '0');
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const ano = d.getFullYear();
+    const hora = String(d.getHours()).padStart(2, '0');
+    const minuto = String(d.getMinutes()).padStart(2, '0');
+
+    return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
+}
+
+// Função para ver detalhes de um simulado específico
+function verDetalhesSimulado(tentativaId) {
+    // Redireciona para a página de resultados do simulado
+    window.location.href = `/pages/pratice-exams-result.html?tentativaId=${tentativaId}`;
+}
+
+// Função para mostrar mensagem de erro
+function mostrarMensagemErro(mensagem) {
+    const container = document.querySelector('.simulado-historico');
+    if (container) {
+        container.innerHTML = `
+            <h3>Histórico de Simulados</h3>
+            <div class="alert alert-error">
+                <p>${mensagem}</p>
+            </div>
+        `;
+    }
+}
+
+// Carrega o histórico quando a página estiver pronta
+document.addEventListener('DOMContentLoaded', () => {
+    carregarHistoricoSimulados();
+});
+
+
 /**
  * Renderiza os cards de matéria na tela SEM usar os dados reais de progresso.
  */
@@ -167,7 +327,6 @@ function renderMateriasCardsWithNoProgress(materias) {
  */
 async function attachPageSpecificLogic() {
     const hash = window.location.hash || '#login';
-    console.log("O hash atual é:", hash);
 
     // Lógica para páginas que exigem dados do usuário (dashboard, aulas, etc.)
     if (hash.startsWith('#dashboard') || hash.startsWith('#video-class')) {
@@ -196,13 +355,13 @@ async function attachPageSpecificLogic() {
     }
 
     // Lógica específica para a página de videoaulas
-    if (hash.startsWith('#summarys')) {
+    else if (hash.startsWith('#summarys')) {
         await populateUserData();
         await loadSupportData();
         await loadMateriasWithoutProgress();
     }
 
-    // Lógica específica para a página de videoaulas por materias
+    // Lógica específica para a página de resumos por materias
     else if (hash.startsWith('#subject/summarys')) {
         await populateUserData();
         attachClassPageListeners();
@@ -212,6 +371,17 @@ async function attachPageSpecificLogic() {
     else if (hash.startsWith('#subject/summary-detail')) {
         await populateUserData();
         await handleResumoDetailPage();
+    }
+
+    else if (hash.startsWith('#pratice-exam')) {
+        await populateUserData();
+        if (hash === '#pratice-exam') {
+            await handleSimuladosStartPage();
+        } else if (hash === '#pratice-exam/active') {
+            await handleSimuladoActivePage();
+        } else if (hash === '#pratice-exam/result') {
+            await handleSimuladoResultPage();
+        }
     }
 }
 
@@ -258,10 +428,374 @@ async function fetchAulasPorMateria(materiaId) {
         return response.json();
 
     } catch (error) {
-        console.error('Falha na requisição de aulas:', error);
         // Retorna um array vazio em caso de erro para não quebrar a interface
         return [];
     }
+}
+
+/**
+ * Adiciona os 'escutadores' de evento para os botões de análise com IA,
+ * com controle de modal moderno (animações e loader).
+ */
+function attachAiButtonListeners() {
+
+    const revisaoContainer = document.getElementById('revisao-questoes-container');
+    const modal = document.getElementById('ai-modal');
+    const modalBody = document.getElementById('ai-modal-body');
+    const closeModalBtn = document.getElementById('ai-modal-close');
+
+    const loaderHTML = `
+            <div class="gemini-loader">
+            <svg width="60" height="60" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <style>
+                    .gemini-star-outer {
+                        fill: #004aad;
+                        transform-origin: center;
+                        animation: spin 2s linear infinite;
+                    }
+                </style>
+                <g class="gemini-star-outer">
+                    <path d="M12 2L9.404 9.404L2 12L9.404 14.596L12 22L14.596 14.596L22 12L14.596 9.404L12 2Z"/>
+                </g>
+            </svg>
+        </div>
+        <p style="text-align: center; color: #333;">O bp está analisando, aguarde um instante...</p>
+    `;
+
+    if (!revisaoContainer || !modal) {
+        return;
+    }
+
+    revisaoContainer.addEventListener('click', async (event) => {
+
+        const target = event.target.closest('.btn-ai-explain');
+
+        if (!target) return;
+
+        const topico = target.dataset.topico;
+        const respostaCorreta = target.dataset.respostaCorreta;
+        const justificativa = target.dataset.justificativa;
+
+        modalBody.innerHTML = loaderHTML;
+        modal.classList.add('visible');
+
+        // O resto do seu código...
+        const prompt = `
+            Você é Backpack, um assistente virtual de uma plataforma de ensino de inglês voltada para vestibulandos.  
+            Seu público é formado por jovens estudantes do ensino médio que estão se preparando para o vestibular.  
+            Sua missão é explicar conceitos de forma clara, didática, motivadora e acessível.
+            
+            INSTRUÇÕES IMPORTANTES:
+            1. Sempre use uma linguagem jovem, simples e próxima do aluno, evitando jargões técnicos complicados.  
+            2. Explique o conceito passo a passo, garantindo que mesmo quem está começando consiga entender.  
+            3. Mostre por que a alternativa correta realmente faz sentido, conectando a explicação ao tópico de estudo.  
+            4. Se possível, use exemplos práticos ou situações do cotidiano que ajudem o aluno a visualizar a aplicação do conceito.  
+            5. Use Markdown para organizar a resposta, tornando-a mais agradável de ler (títulos, negrito, itálico, exemplos formatados).  
+            6. O tom deve ser positivo e amigável, como se fosse um colega de estudos mais experiente explicando o assunto.  
+            
+            DADOS DA QUESTÃO:
+            - Tópico de estudo: "${topico}"  
+            - Resposta correta: "${respostaCorreta}"  
+            - Justificativa fornecida: "${justificativa}"  
+            
+            TAREFA:
+            Explique em mais detalhes o tópico acima, reforçando por que a resposta correta está certa e ampliando a justificativa.  
+            Finalize com um exemplo prático em Markdown que ajude a fixar o conteúdo.`;
+
+        try {
+            const aiResponse = await fetchGeminiExplanation(prompt);
+            modalBody.innerHTML = marked.parse(aiResponse.conteudo);
+        } catch (error) {
+            modalBody.innerHTML = '<p style="color: #d90429;">Epa! Tivemos um problema para contatar o bp. Por favor, tente novamente mais tarde.</p>';
+        }
+    });
+
+    const closeModal = () => modal.classList.remove('visible');
+    closeModalBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', attachAiButtonListeners);
+
+
+/**
+ * Envia um prompt para a API do Gemini no backend.
+ */
+async function fetchGeminiExplanation(prompt) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/ai/gemini/sync/analise-questao`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt })
+        });
+        if (!response.ok) throw new Error('Falha na resposta da IA.');
+        const textoDaResposta = await response.text();
+
+        return { conteudo: textoDaResposta };
+
+    } catch (error) {
+        return { conteudo: "Desculpe, não foi possível obter uma análise da IA neste momento." };
+    }
+}
+
+async function gerarSimulado(materiaId) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/simulados/gerar`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ materiaId })
+    });
+    if (!response.ok) throw new Error('Falha ao gerar simulado');
+    return await response.json();
+}
+
+async function submeterSimulado(submissao) {
+    const response = await fetch(`${API_BASE_URL}/api/v1/simulados/submeter`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submissao)
+    });
+    if (!response.ok) throw new Error('Falha ao submeter simulado');
+    return await response.json();
+}
+
+// Função para a página inicial de simulados
+async function handleSimuladosStartPage() {
+    // Buscar todas as matérias e popular o select
+    const selectMaterias = document.getElementById('select-materia-simulado');
+    const btnGerar = document.getElementById('btn-gerar-simulado');
+
+    try {
+        // Buscar matérias da API
+        const materias = await fetchMaterias();
+
+        if (materias && materias.content && materias.content.length > 0) {
+            // Gerar as opções do select com as matérias disponíveis
+            const opcoesHtml = materias.content.map(materia => 
+                `<option value="${materia.id}">${materia.nome}</option>`
+            ).join('');
+
+            selectMaterias.innerHTML = opcoesHtml;
+            btnGerar.disabled = false;
+        } else {
+            selectMaterias.innerHTML = `<option value="">Nenhuma matéria disponível</option>`;
+            btnGerar.disabled = true;
+        }
+    } catch (error) {
+        selectMaterias.innerHTML = `<option value="">Erro ao carregar matérias</option>`;
+        btnGerar.disabled = true;
+    }
+
+    btnGerar.onclick = async () => {
+        const materiaId = selectMaterias.value;
+        if (!materiaId) {
+            alert('Por favor, selecione uma matéria');
+            return;
+        }
+
+        btnGerar.textContent = 'Gerando...';
+        btnGerar.disabled = true;
+
+        try {
+            const simuladoData = await gerarSimulado(Number(materiaId));
+
+            estadoSimuladoAtivo = {
+                tentativaId: simuladoData.tentativaId,
+                questoes: simuladoData.questoes,
+                respostasUsuario: {},
+                questaoAtual: 0,
+                resultado: null
+            };
+
+            window.location.hash = '#pratice-exam/active';
+        } catch (error) {
+            alert('Não foi possível gerar o simulado. Tente novamente mais tarde.');
+            btnGerar.textContent = 'Gerar Simulado';
+            btnGerar.disabled = false;
+        }
+    };
+}
+
+// Função principal para a página do simulado ativo
+function handleSimuladoActivePage() {
+    if (!estadoSimuladoAtivo || !estadoSimuladoAtivo.questoes || estadoSimuladoAtivo.questoes.length === 0) {
+        window.location.hash = '#pratice-exam';
+        return;
+    }
+
+    const btnAnterior = document.getElementById('btn-anterior');
+    const btnProximo = document.getElementById('btn-proximo');
+    const questaoContainer = document.getElementById('questao-container');
+
+    function renderizarQuestao() {
+        const totalQuestoes = estadoSimuladoAtivo.questoes.length;
+        document.getElementById('current-question-number').textContent = estadoSimuladoAtivo.questaoAtual + 1;
+        document.getElementById('total-question-number').textContent = totalQuestoes;
+
+        const questao = estadoSimuladoAtivo.questoes[estadoSimuladoAtivo.questaoAtual];
+
+        // Verifica se a questão existe
+        if (!questao) {
+            questaoContainer.innerHTML = '<p class="error-message">Erro ao carregar questão</p>';
+            return;
+        }
+
+        const alternativasHtml = questao.alternativas.map(alt => {
+            const isChecked = estadoSimuladoAtivo.respostasUsuario[questao.topicoId] === alt.id;
+            return `
+                <label class="alternativa-label ${isChecked ? 'selected' : ''}">
+                    <input type="radio" name="alternativa" value="${alt.id}" ${isChecked ? 'checked' : ''}>
+                    <span>${alt.textoAfirmativa}</span>
+                </label>
+            `;
+        }).join('');
+
+        questaoContainer.innerHTML = `
+            <div class="questao-card">
+                <h2 class="questao-titulo">Questão ${estadoSimuladoAtivo.questaoAtual + 1}</h2>
+                <div class="alternativas-group">${alternativasHtml}</div>
+            </div>
+        `;
+
+        // Adiciona eventos de clique nas alternativas
+        questaoContainer.querySelectorAll('input[name="alternativa"]').forEach(radio => {
+            radio.onchange = (e) => {
+                estadoSimuladoAtivo.respostasUsuario[questao.topicoId] = Number(e.target.value);
+                // Atualiza a visualização para mostrar a seleção
+                document.querySelectorAll('.alternativa-label').forEach(label => {
+                    label.classList.remove('selected');
+                });
+                e.target.closest('.alternativa-label').classList.add('selected');
+            };
+        });
+
+        // Atualiza estado dos botões
+        btnAnterior.disabled = estadoSimuladoAtivo.questaoAtual === 0;
+        if (estadoSimuladoAtivo.questaoAtual === totalQuestoes - 1) {
+            btnProximo.textContent = 'Finalizar';
+            btnProximo.classList.add('btn-finalizar');
+        } else {
+            btnProximo.textContent = 'Próxima';
+            btnProximo.classList.remove('btn-finalizar');
+        }
+    }
+
+    btnAnterior.onclick = () => {
+        if (estadoSimuladoAtivo.questaoAtual > 0) {
+            estadoSimuladoAtivo.questaoAtual--;
+            renderizarQuestao();
+        }
+    };
+
+    btnProximo.onclick = async () => {
+        const totalQuestoes = estadoSimuladoAtivo.questoes.length;
+        if (estadoSimuladoAtivo.questaoAtual < totalQuestoes - 1) {
+            estadoSimuladoAtivo.questaoAtual++;
+            renderizarQuestao();
+        } else {
+            // Verificar se todas as questões foram respondidas
+            const questoesRespondidas = Object.keys(estadoSimuladoAtivo.respostasUsuario).length;
+            if (questoesRespondidas !== totalQuestoes) {
+                const faltam = totalQuestoes - questoesRespondidas;
+                alert(`Ainda falta${faltam > 1 ? 'm' : ''} responder ${faltam} questão(ões). Por favor, navegue pelas questões e responda todas.`);
+                return;
+            }
+
+            // Finalizar o simulado
+            btnProximo.textContent = 'Enviando...';
+            btnProximo.disabled = true;
+
+            try {
+                const submissao = {
+                    tentativaId: estadoSimuladoAtivo.tentativaId,
+                    respostas: estadoSimuladoAtivo.respostasUsuario
+                };
+                const resultado = await submeterSimulado(submissao);
+                estadoSimuladoAtivo.resultado = resultado;
+                window.location.hash = '#pratice-exam/result';
+            } catch (error) {
+                alert('Houve um erro ao enviar suas respostas. Tente novamente.');
+                btnProximo.textContent = 'Finalizar Simulado';
+                btnProximo.disabled = false;
+            }
+        }
+    };
+
+    // Renderiza a primeira questão ao carregar a página
+    renderizarQuestao();
+}
+
+// Função para a página de resultados
+function handleSimuladoResultPage() {
+    const resultado = estadoSimuladoAtivo.resultado;
+    if (!resultado) {
+        window.location.hash = '#pratice-exam';
+        return;
+    }
+
+    // Atualiza o cabeçalho da página
+    const pageTitle = document.querySelector('.dashboard-header h1');
+    if (pageTitle) {
+        pageTitle.textContent = 'Resultado do Simulado';
+    }
+
+    // Preenche os dados do resumo
+    document.getElementById('pontuacao-final').textContent = `${resultado.pontuacaoFinal.toFixed(0)}%`;
+    document.getElementById('total-acertos').textContent = resultado.acertos;
+    document.getElementById('total-questoes').textContent = resultado.totalQuestoes;
+
+    // Renderiza a revisão de cada questão
+    const revisaoContainer = document.getElementById('revisao-questoes-container');
+    const revisaoHtml = resultado.questoesCorrigidas.map((q, index) => `
+        <div class="revisao-item card ${q.acertou ? 'correta' : 'incorreta'}">
+            <div class="revisao-header">
+                <span class="questao-numero">Questão ${index + 1}</span>
+                <span class="status-badge ${q.acertou ? 'acerto' : 'erro'}">${q.acertou ? 'Acerto' : 'Erro'}</span>
+            </div>
+
+            <div class="revisao-detalhes">
+                <p><strong>Sua resposta:</strong> ${q.textoAlternativaEscolhida || 'Não respondida'}</p>
+                <p><strong>Resposta Correta:</strong> ${q.textoAlternativaCorreta}</p>
+                ${q.justificativa ? `<div class="justificativa"><p><strong>Justificativa:</strong> ${q.justificativa}</p></div>` : ''}
+            </div>
+
+            <div class="card-footer">
+                <button class="btn-ai-explain" 
+                        data-topico="${q.tituloTopico}" 
+                        data-resposta-correta="${q.textoAlternativaCorreta}"
+                        data-justificativa="${q.justificativa || ''}">
+                    <img 
+                      src="https://cdn.simpleicons.org/googlegemini/blue" 
+                      alt="Google Gemini Logo" 
+                      width="24" 
+                      height="24"
+                    />
+                    <span>Analisar com IA</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+
+    revisaoContainer.innerHTML = revisaoHtml;
+
+    // Adiciona botão para voltar à página inicial de simulados
+    revisaoContainer.innerHTML += `
+        <div class="actions-footer">
+            <button id="btn-novo-simulado" class="btn-primary">Fazer Novo Simulado</button>
+        </div>
+    `;
+
+    // Adiciona evento ao botão de novo simulado
+    document.getElementById('btn-novo-simulado').onclick = () => {
+        window.location.hash = '#pratice-exam';
+    };
+
+    // Ativa os botões de análise com IA
+    attachAiButtonListeners();
 }
 
 /**
@@ -274,7 +808,6 @@ async function fetchResumosPorMateria(materiaId) {
         if (!response.ok) throw new Error('Falha ao buscar a lista de resumos.');
         return await response.json();
     } catch (error) {
-        console.error(error);
         return [];
     }
 }
@@ -297,7 +830,6 @@ async function fetchProgressoResumos() {
             return map;
         }, {});
     } catch (error) {
-        console.error(error);
         return {};
     }
 }
@@ -315,7 +847,6 @@ async function marcarResumoComoLido(resumoId) {
         if (!response.ok) throw new Error('Falha ao marcar resumo como lido');
         return await response.json();
     } catch (error) {
-        console.error(error);
         return null;
     }
 }
@@ -330,7 +861,6 @@ async function fetchResumoPorId(resumoId) {
         if (!response.ok) throw new Error('Falha ao buscar o resumo.');
         return await response.json();
     } catch (error) {
-        console.error(error);
         return null;
     }
 }
@@ -369,7 +899,6 @@ async function fetchProgressoAulas() {
             return map;
         }, {});
     } catch (error) {
-        console.error(error);
         return {}; // Retorna um mapa vazio em caso de erro
     }
 }
@@ -389,7 +918,6 @@ async function fetchEstatisticasUsuario() {
         }
         return await response.json();
     } catch (error) {
-        console.error('Erro na API de estatísticas:', error);
         return null; // Retorna nulo em caso de erro
     }
 }
@@ -416,7 +944,6 @@ async function marcarAulaComoConcluida(aulaId) {
 
         return await response.json();
     } catch (error) {
-        console.error(error);
         return null;
     }
 }
@@ -433,7 +960,6 @@ async function loadSupportData() {
         supportData.materias = pageData.content;
 
     } catch (error) {
-        console.error('Erro ao carregar dados de suporte:', error);
     }
 }
 
@@ -458,7 +984,6 @@ async function loadMaterias() {
         renderMateriasCardsWithProgress(materiasComProgresso);
 
     } catch (error) {
-        console.error('Erro ao carregar matérias:', error);
     }
 }
 
@@ -479,7 +1004,6 @@ async function loadMateriasWithoutProgress() {
         renderMateriasCardsWithNoProgress(materiasComProgresso);
 
     } catch (error) {
-        console.error('Erro ao carregar matérias:', error);
     }
 }
 
@@ -542,7 +1066,9 @@ function updateBodyClass(hash) {
         document.body.className = 'summarys-view';
     } else if (hash.startsWith('#subject/summary-detail')) {
         document.body.className = 'summarys-view';
-    } else {
+    } else if (hash.startsWith('#pratice-exam')) {
+        document.body.className = 'pratice-exams-view';
+    }else {
         document.body.className = 'auth-view';
     }
 }
@@ -572,8 +1098,6 @@ async function populateUserData() {
             userAvatar.alt = `Avatar de ${user.nomeCompleto}`;
         }
     } catch (error) {
-        // Se não conseguir buscar o usuário, redireciona para a página de login.
-        console.error("Falha na autenticação:", error.message);
         window.location.hash = '#login';
     }
 }
@@ -810,8 +1334,6 @@ function attachClassPageListeners() {
         filterTitulo.addEventListener('input', (e) => {
             debouncedUpdate(e.target.value);
         });
-    } else {
-        console.error("Campo de busca #busca-nome-materia não foi encontrado na página.");
     }
 }
 
@@ -957,7 +1479,6 @@ async function handleAulasPage() {
 
     // Validação inicial
     if (!materiaId) {
-        console.error("ID da Matéria não encontrado na URL.");
         if (classListContainer) classListContainer.innerHTML = `<p>Erro: ID da matéria não especificado.</p>`;
         return;
     }
@@ -974,7 +1495,6 @@ async function handleAulasPage() {
     ]);
 
     if (!classListContainer) {
-        console.error("Elemento com id='class-list' não encontrado no HTML.");
         return;
     }
 
@@ -1039,7 +1559,6 @@ async function handleAulasPage() {
  * Busca os resumos e o progresso do usuário para exibir o status de leitura.
  */
 async function handleResumosListPage() {
-    console.log("Carregando página de lista de resumos...");
 
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
     const materiaId = params.get('materiaId');
@@ -1048,7 +1567,6 @@ async function handleResumosListPage() {
 
     // Validações iniciais
     if (!container) {
-        console.error("Container com id='resumos-list-container' não encontrado.");
         return;
     }
     if (!materiaId) {
@@ -1100,7 +1618,6 @@ async function handleResumosListPage() {
  * Marca o resumo como lido e exibe seu conteúdo formatado.
  */
 async function handleResumoDetailPage() {
-    console.log("Carregando página de detalhe do resumo...");
 
     const params = new URLSearchParams(window.location.hash.split('?')[1]);
     const resumoId = params.get('id');
@@ -1108,7 +1625,6 @@ async function handleResumoDetailPage() {
 
     // Validações iniciais
     if (!container) {
-        console.error("Container com id='resumo-detail-container' não encontrado.");
         return;
     }
     if (!resumoId) {
