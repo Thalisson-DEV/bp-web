@@ -7,15 +7,20 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Random;
-
 @Service
 public class AuthenticationService implements UserDetailsService {
 
     @Autowired
     UsuariosRepository repository;
 
+    @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return repository.findByEmail(email);
+        UserDetails user = repository.findByEmail(email);
+        
+        if (user == null) {
+            throw new UsernameNotFoundException("Usuário não encontrado com o email: " + email);
+        }
+        
+        return user;
     }
 }

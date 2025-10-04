@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -41,19 +42,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO data) {
-        var usuarioPassword = new UsernamePasswordAuthenticationToken(data.email(), data.senha());
-        var auth = this.authenticationManager.authenticate(usuarioPassword);
-        var token = tokenService.generateToken((Usuarios) auth.getPrincipal());
+        try {
+            var usuarioPassword = new UsernamePasswordAuthenticationToken(data.email(), data.senha());
+            var auth = this.authenticationManager.authenticate(usuarioPassword);
+            var token = tokenService.generateToken((Usuarios) auth.getPrincipal());
 
-        Cookie cookie = new Cookie("Authorization", "Bearer " + token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        cookie.setPath("/");
-        cookie.setMaxAge(2 * 60 * 60);
+            Cookie cookie = new Cookie("Authorization", "Bearer " + token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false);
+            cookie.setPath("/");
+            cookie.setMaxAge(2 * 60 * 60);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, String.format("%s=%s; HttpOnly; Path=/; Max-Age=%d", cookie.getName(), token, cookie.getMaxAge()))
-                .body("Autenticado com sucesso.");
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, String.format("%s=%s; HttpOnly; Path=/; Max-Age=%d", cookie.getName(), token, cookie.getMaxAge()))
+                    .body("Autenticado com sucesso.");
+        } catch (AuthenticationException e) {
+        return ResponseEntity.status(401).body(Map.of("message", "Email ou senha inválidos."));
+        }
     }
 
     @GetMapping("/me")

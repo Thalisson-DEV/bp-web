@@ -396,7 +396,7 @@ async function attachPageSpecificLogic() {
  * @throws {Error} Se o usuário não estiver autenticado.
  */
 async function fetchCurrentUser() {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/me`, {
+    const response = await fetch(`/api/v1/auth/me`, {
         method: 'GET',
         credentials: 'include', // Envia cookies de autenticação
     });
@@ -410,7 +410,7 @@ async function fetchCurrentUser() {
  * @returns {Promise<Array>} - Uma promessa que resolve para a lista de aulas.
  */
 async function fetchAulasPorMateria(materiaId) {
-    const url = `${API_BASE_URL}/api/v1/aulas/by-materia/${materiaId}`;
+    const url = `/api/v1/aulas/by-materia/${materiaId}`;
 
     try {
         const response = await fetch(url, {
@@ -525,7 +525,7 @@ document.addEventListener('DOMContentLoaded', attachAiButtonListeners);
  */
 async function fetchGeminiExplanation(prompt) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/ai/gemini/sync/analise-questao`, {
+        const response = await fetch(`/api/v1/ai/gemini/sync/analise-questao`, {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
@@ -542,7 +542,7 @@ async function fetchGeminiExplanation(prompt) {
 }
 
 async function gerarSimulado(materiaId) {
-    const response = await fetch(`${API_BASE_URL}/api/v1/simulados/gerar`, {
+    const response = await fetch(`/api/v1/simulados/gerar`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -553,7 +553,7 @@ async function gerarSimulado(materiaId) {
 }
 
 async function submeterSimulado(submissao) {
-    const response = await fetch(`${API_BASE_URL}/api/v1/simulados/submeter`, {
+    const response = await fetch(`/api/v1/simulados/submeter`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -802,7 +802,7 @@ function handleSimuladoResultPage() {
  * Busca a LISTA de resumos para uma matéria específica.
  */
 async function fetchResumosPorMateria(materiaId) {
-    const url = `${API_BASE_URL}/api/v1/resumo/by-materia/${materiaId}`;
+    const url = `/api/v1/resumo/by-materia/${materiaId}`;
     try {
         const response = await fetch(url, { credentials: 'include' });
         if (!response.ok) throw new Error('Falha ao buscar a lista de resumos.');
@@ -818,7 +818,7 @@ async function fetchResumosPorMateria(materiaId) {
  */
 async function fetchProgressoResumos() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/progresso-resumo`, { // Confirme a URL base
+        const response = await fetch(`/api/v1/progresso-resumo`, { // Confirme a URL base
             credentials: 'include'
         });
         if (!response.ok) throw new Error('Falha ao buscar progresso dos resumos');
@@ -840,7 +840,7 @@ async function fetchProgressoResumos() {
  */
 async function marcarResumoComoLido(resumoId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/progresso-resumo/${resumoId}`, { // Confirme a URL base
+        const response = await fetch(`/api/v1/progresso-resumo/${resumoId}`, { // Confirme a URL base
             method: 'POST',
             credentials: 'include'
         });
@@ -855,7 +855,7 @@ async function marcarResumoComoLido(resumoId) {
  * Busca os dados de UM ÚNICO resumo pelo seu ID.
  */
 async function fetchResumoPorId(resumoId) {
-    const url = `${API_BASE_URL}/api/v1/resumo/${resumoId}`;
+    const url = `/api/v1/resumo/${resumoId}`;
     try {
         const response = await fetch(url, { credentials: 'include' });
         if (!response.ok) throw new Error('Falha ao buscar o resumo.');
@@ -871,7 +871,7 @@ async function fetchResumoPorId(resumoId) {
  * @throws {Error} Se a requisição falhar.
  */
 async function fetchMaterias() {
-    const response = await fetch(`${API_BASE_URL}/api/v1/materias`, {
+    const response = await fetch(`/api/v1/materias`, {
         method: 'GET',
         credentials: 'include',
     });
@@ -885,7 +885,7 @@ async function fetchMaterias() {
  */
 async function fetchProgressoAulas() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/progresso`, { // Confirme se a URL base é /progresso
+        const response = await fetch(`/api/v1/progresso`, { // Confirme se a URL base é /progresso
             method: 'GET',
             credentials: 'include'
         });
@@ -909,7 +909,7 @@ async function fetchProgressoAulas() {
  */
 async function fetchEstatisticasUsuario() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/estatisticas/meu-progresso`, {
+        const response = await fetch(`/api/v1/estatisticas/meu-progresso`, {
             method: 'GET',
             credentials: 'include'
         });
@@ -928,7 +928,7 @@ async function fetchEstatisticasUsuario() {
  */
 async function marcarAulaComoConcluida(aulaId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/progresso/${aulaId}`, { // Confirme se a URL base é /progresso
+        const response = await fetch(`/api/v1/progresso/${aulaId}`, { // Confirme se a URL base é /progresso
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -969,7 +969,7 @@ async function loadSupportData() {
  */
 async function loadMaterias() {
     // 1. A URL agora aponta para o novo endpoint que já calcula o progresso.
-    const url = `${API_BASE_URL}/api/v1/materias/meu-progresso`;
+    const url = `/api/v1/materias/meu-progresso`;
 
     try {
         const response = await fetch(url, {
@@ -992,7 +992,7 @@ async function loadMaterias() {
  */
 async function loadMateriasWithoutProgress() {
     // 1. A URL agora aponta para o novo endpoint que já calcula o progresso.
-    const url = `${API_BASE_URL}/api/v1/materias/meu-progresso`;
+    const url = `/api/v1/materias/meu-progresso`;
 
     try {
         const response = await fetch(url, {
@@ -1012,7 +1012,7 @@ async function loadMateriasWithoutProgress() {
  * @param {Object} userData - Dados do usuário para registro.
  */
 async function registerUser(userData) {
-    const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+    const response = await fetch(`/api/v1/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1371,7 +1371,7 @@ async function handleLoginSubmit(event) {
     const { email, password } = Object.fromEntries(formData.entries());
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+        const response = await fetch(`/api/v1/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, senha: password }),
@@ -1442,7 +1442,7 @@ async function handleForgotPasswordSubmit(event) {
     const { email } = Object.fromEntries(formData.entries());
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/auth/forgot-password`, {
+        const response = await fetch(`/api/v1/auth/forgot-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
