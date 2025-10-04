@@ -2,6 +2,9 @@
 FROM eclipse-temurin:24-jdk AS build
 WORKDIR /app
 
+# Instala o Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
+
 # Copia o pom.xml e baixa as dependências primeiro (cache de build)
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
