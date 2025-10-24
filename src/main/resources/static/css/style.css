@@ -1409,7 +1409,7 @@ body.auth-view {
     color: var(--primary-color, #2196f3);
 }
 
-.progress-bar-container {
+.exam-progress-bar-container {
     width: 200px;
     height: 10px;
     background-color: #e0e0e0;
@@ -1417,7 +1417,7 @@ body.auth-view {
     overflow: hidden;
 }
 
-.progress-bar {
+.exam-progress-bar {
     height: 100%;
     background-color: var(--primary-color, #2196f3);
     width: 10%; /* Será atualizado dinamicamente */

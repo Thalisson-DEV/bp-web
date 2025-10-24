@@ -274,7 +274,7 @@ function formatarData(data) {
 // Função para ver detalhes de um simulado específico
 function verDetalhesSimulado(tentativaId) {
     // Redireciona para a página de resultados do simulado
-    window.location.href = `/pages/pratice-exams-result.html?tentativaId=${tentativaId}`;
+    window.location.href = `/pages/pratice-exams-result?tentativaId=${tentativaId}`;
 }
 
 // Função para mostrar mensagem de erro
